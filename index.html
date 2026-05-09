@@ -12,9 +12,12 @@
     <div class="background-gradient"></div>
 
     <div class="app-container">
-        <!-- אזור עליון - שעון ותאריך -->
+        <!-- אזור עליון - שעון, תאריך ומסך מלא -->
         <header class="top-bar glass-panel">
-            <div id="live-time" class="time-display">00:00:00</div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button id="btn-fullscreen" class="ios-button-small" title="החלף מצב מסך מלא">מסך מלא 🔲</button>
+                <div id="live-time" class="time-display">00:00:00</div>
+            </div>
             <div id="live-date" class="date-display">טוען תאריך...</div>
         </header>
 
@@ -27,14 +30,13 @@
                 <p class="subtitle">מערכת ניהול משחק בזמן אמת</p>
                 <button id="btn-new-match" class="ios-button primary-action">התחלת משחק חדש</button>
                 
-                <!-- חלון צף לחזרה למשחק פעיל -->
                 <button id="btn-resume-match" class="ios-button active-match-widget hidden">
                     <div class="pulse-indicator"></div>
                     <span>חזור למשחק הפעיל</span>
                 </button>
 
                 <div class="system-info">
-                    <span>גרסה 1.1</span> | <span>&copy; 2026 by Idan Biton</span>
+                    <span>גרסה 1.2</span> | <span>&copy; 2026 by Idan Biton</span>
                 </div>
             </div>
         </main>
@@ -69,9 +71,7 @@
                             </div>
                         </div>
                         
-                        <div id="players-list-container" class="players-list-container">
-                            <!-- שורות שחקנים יתווספו כאן דינמית -->
-                        </div>
+                        <div id="players-list-container" class="players-list-container"></div>
                         <button type="button" id="btn-add-player" class="ios-button-small add-btn">+ הוסף שחקן</button>
                     </div>
                     
@@ -87,35 +87,35 @@
         <main id="lineup-screen" class="screen">
             <div class="lineup-container">
                 <div class="lineup-header glass-panel">
-                    <button type="button" id="btn-back-setup" class="ios-button-small secondary-action">חזור להגדרות</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" id="btn-back-home-lineup" class="ios-button-small secondary-action">ראשי</button>
+                        <button type="button" id="btn-back-setup" class="ios-button-small secondary-action">הגדרות</button>
+                    </div>
                     <h2>תכנון הרכב פותח</h2>
                     <button id="btn-start-match" class="ios-button primary-action">התחל משחק ⚽️</button>
                 </div>
 
-                <!-- תפריט שמירת הרכבים -->
                 <div class="lineup-saves glass-panel">
                     <span style="font-weight: bold; margin-left: 10px;">ניהול הרכבים:</span>
-                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור הרכב 1</button>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור 1</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="1">טען 1</button>
                     <span class="divider">|</span>
-                    <button type="button" class="ios-button-small save-lineup" data-slot="2">שמור הרכב 2</button>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="2">שמור 2</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="2">טען 2</button>
                     <span class="divider">|</span>
-                    <button type="button" class="ios-button-small save-lineup" data-slot="3">שמור הרכב 3</button>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="3">שמור 3</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="3">טען 3</button>
                 </div>
                 
                 <div class="tactical-area">
                     <div id="pitches-container" class="pitches-wrapper">
-                        <!-- המגרשים (חצאי מגרש) יופיעו כאן -->
+                        <!-- חצאי המגרשים המוגדלים יופיעו כאן -->
                     </div>
                 </div>
 
                 <div class="bench-area glass-panel">
-                    <h3>ספסל שחקנים (לחץ על שחקן ואז על עמדה)</h3>
-                    <div id="bench-players" class="bench-players-list">
-                        <!-- שחקנים יופיעו כאן -->
-                    </div>
+                    <h3>ספסל שחקנים (בחר שחקן ואז לחץ על עמדה)</h3>
+                    <div id="bench-players" class="bench-players-list"></div>
                 </div>
             </div>
         </main>
