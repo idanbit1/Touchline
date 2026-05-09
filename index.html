@@ -35,14 +35,65 @@
         </main>
 
         <!-- מסך הגדרות משחק (מוסתר כברירת מחדל) -->
+           <!-- מסך הגדרות משחק -->
         <main id="setup-screen" class="screen">
             <div class="setup-container glass-panel">
                 <h2>הגדרות משחק חדש</h2>
-                <!-- הטופס ייבנה בהמשך -->
-                <button id="btn-back-home" class="ios-button secondary-action">חזרה</button>
+                <form id="setup-form" class="setup-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>קבוצה יריבה</label>
+                            <input type="text" id="opponent-name" required placeholder="לדוגמה: מכבי חיפה">
+                        </div>
+                        <div class="form-group">
+                            <label>מיקום</label>
+                            <select id="match-location">
+                                <option value="home">בית (מ.ס רובי שפירא)</option>
+                                <option value="away">חוץ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>שיטת משחק</label>
+                            <select id="match-format">
+                                <option value="2-7v7">2 מגרשים (7 נגד 7)</option>
+                                <option value="1-9v9">מגרש אחד (9 נגד 9)</option>
+                                <option value="1-11v11">מגרש אחד (11 נגד 11)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>משך משחק (דקות)</label>
+                            <select id="match-duration">
+                                <option value="70" selected>70 דקות (35 כל מחצית)</option>
+                                <option value="60">60 דקות (30 כל מחצית)</option>
+                                <option value="90">90 דקות (45 כל מחצית)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>רשימת שחקנים (שם, מספר)</label>
+                        <textarea id="players-list" rows="4" placeholder="הדבק כאן רשימה. לדוגמה:&#10;יוסי לוי, 10&#10;דני כהן, 7" required></textarea>
+                        <small>הזן כל שחקן בשורה נפרדת. ניתן להעתיק ולהדביק מאקסל.</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="btn-back-home" class="ios-button secondary-action">ביטול</button>
+                        <button type="submit" class="ios-button primary-action">המשך לשיבוץ הרכב</button>
+                    </div>
+                </form>
             </div>
         </main>
-    </div>
+        
+        <!-- מסך תכנון הרכב (הכנה לשלב הבא) -->
+        <main id="lineup-screen" class="screen">
+            <div class="glass-panel" style="padding: 40px; text-align: center;">
+                <h2>תכנון הרכב</h2>
+                <p>הנתונים נשמרו בהצלחה! כאן נבנה את תצוגת המגרשים והגרירה.</p>
+            </div>
+        </main>
 
     <script src="app.js"></script>
 </body>
