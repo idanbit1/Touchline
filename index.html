@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Touchline - Tactical Board</title>
-    <!-- טעינת ספריית עזר לגרירה במגע (חשוב במיוחד לאייפד) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/drag-drop-touch/1.1.0/drag-droptouch.js"></script>
+    <title>TacticalBoard - תכנון הרכב</title>
     <style>
         :root {
             --primary: #2ecc71;
@@ -19,73 +17,30 @@
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 20px;
             background-color: #ecf0f1;
             display: flex;
             flex-direction: column;
             height: 100vh;
             box-sizing: border-box;
-            overflow: hidden;
+            user-select: none;
         }
 
-        /* עיצוב הלוגו החדש */
         header {
             text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .logo-container {
-            display: inline-block;
-        }
-
-        .logo-text {
-            font-size: 3.5rem;
-            font-weight: 900;
+            margin-bottom: 20px;
             color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: -2px;
-            margin: 0;
         }
 
-        .ball-o {
-            display: inline-block;
-            width: 45px;
-            height: 45px;
-            background: white;
-            border: 3px solid var(--text-dark);
-            border-radius: 50%;
-            margin: 0 2px;
-            position: relative;
-            animation: bounce 1.2s infinite ease-in-out;
-            background-image: 
-                radial-gradient(circle at 50% 50%, transparent 60%, #333 62%),
-                linear-gradient(45deg, transparent 45%, #333 48%, #333 52%, transparent 55%),
-                linear-gradient(-45deg, transparent 45%, #333 48%, #333 52%, transparent 55%);
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .creator-tag {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-top: -5px;
-            font-weight: 500;
-        }
-
-        /* ספסל */
+        /* ספסל השחקנים */
         .bench-container {
             background-color: var(--bench-bg);
-            padding: 12px;
+            padding: 15px;
             border-radius: 12px;
-            margin-bottom: 15px;
-            min-height: 70px;
+            margin-bottom: 20px;
+            min-height: 80px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             overflow-x: auto;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -94,40 +49,42 @@
         .bench-title {
             color: var(--text-light);
             font-weight: bold;
-            margin-left: 10px;
+            margin-left: 15px;
             white-space: nowrap;
         }
 
         /* מגרשים */
         .pitches-wrapper {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             flex: 1;
-            min-height: 0;
         }
 
         .pitch {
             flex: 1;
             background-color: var(--pitch-bg);
-            border: 3px solid #fff;
+            border: 4px solid #fff;
             border-radius: 8px;
             position: relative;
             display: grid;
-            grid-template-rows: 1fr 1fr 1fr 1fr;
-            padding: 10px;
-            gap: 5px;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
+            grid-template-rows: 1fr 1fr 1fr 1fr; /* שוער, הגנה, קישור, התקפה */
+            padding: 20px;
+            gap: 10px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.2);
         }
 
-        .pitch-label {
+        .pitch-title {
             position: absolute;
-            bottom: 5px;
-            right: 10px;
-            color: rgba(255,255,255,0.4);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.2);
+            font-size: 3rem;
             font-weight: bold;
-            font-size: 1.2rem;
+            pointer-events: none;
         }
 
+        /* עמדות במגרש (Drop Zones) */
         .zone-row {
             display: flex;
             justify-content: space-around;
@@ -135,26 +92,27 @@
         }
 
         .drop-zone {
-            width: 65px;
-            height: 65px;
-            border: 2px dashed rgba(255,255,255,0.5);
+            width: 80px;
+            height: 80px;
+            border: 2px dashed rgba(255,255,255,0.6);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background-color 0.2s;
         }
 
         .drop-zone.drag-over {
-            background-color: rgba(255,255,255,0.2);
+            background-color: rgba(255,255,255,0.3);
             border-style: solid;
         }
 
-        /* כרטיס שחקן */
+        /* כרטיס שחקן (Draggable) */
         .player-card {
             background-color: var(--player-bg);
             color: var(--text-dark);
-            width: 55px;
-            height: 55px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -162,16 +120,28 @@
             align-items: center;
             font-weight: bold;
             cursor: grab;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            z-index: 10;
-            flex-shrink: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
 
-        .player-number { font-size: 1rem; }
-        .player-name { font-size: 0.6rem; text-align: center; }
+        .player-card:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .player-number {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .player-name {
+            font-size: 0.7rem;
+            text-align: center;
+            line-height: 1;
+        }
 
         .actions {
-            padding: 15px;
+            margin-top: 20px;
             text-align: center;
         }
 
@@ -179,10 +149,12 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
+            padding: 15px 40px;
+            font-size: 1.2rem;
             border-radius: 8px;
+            cursor: pointer;
             font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
     </style>
@@ -190,63 +162,72 @@
 <body>
 
     <header>
-        <div class="logo-container">
-            <h1 class="logo-text">T<span class="ball-o"></span>uchline</h1>
-            <div class="creator-tag">By Idan Biton</div>
-        </div>
+        <h1>⚽ TacticalBoard - תכנון הרכבים (7x7)</h1>
     </header>
 
+    <!-- ספסל השחקנים -->
     <div class="bench-container" id="bench" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="bench-title">ספסל רובי שפירא:</div>
+        <div class="bench-title">ספסל (רובי שפירא):</div>
+        <!-- שחקנים יוזרקו לכאן באמצעות JavaScript -->
     </div>
 
+    <!-- מגרשים -->
     <div class="pitches-wrapper">
         <!-- מגרש 1 -->
         <div class="pitch">
-            <div class="pitch-label">מגרש 1</div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="pitch-title">מגרש 1</div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="FW"></div></div>
             <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
             </div>
             <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
             </div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="GK"></div></div>
         </div>
 
         <!-- מגרש 2 -->
         <div class="pitch">
-            <div class="pitch-label">מגרש 2</div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="pitch-title">מגרש 2</div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="FW"></div></div>
             <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
             </div>
             <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
             </div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="GK"></div></div>
         </div>
     </div>
 
     <div class="actions">
-        <button class="btn-start" onclick="saveGame()">שמור והמשך</button>
+        <button class="btn-start" onclick="startGame()">שמור הרכבים והתחל משחק</button>
     </div>
 
     <script>
+        // רשימת שחקנים (שם ומספר בלבד)
         const playersData = [
-            { id: 'p1', name: 'אורי', number: 1 }, { id: 'p2', name: 'נועם', number: 4 },
-            { id: 'p3', name: 'איתי', number: 5 }, { id: 'p4', name: 'דוד', number: 8 },
-            { id: 'p5', name: 'יהונתן', number: 10 }, { id: 'p6', name: 'לביא', number: 7 },
-            { id: 'p7', name: 'אריאל', number: 9 }, { id: 'p8', name: 'יוסף', number: 12 },
-            { id: 'p9', name: 'אדם', number: 15 }, { id: 'p10', name: 'עומר', number: 20 },
-            { id: 'p11', name: 'רועי', number: 3 }, { id: 'p12', name: 'עידו', number: 6 },
-            { id: 'p13', name: 'ינאי', number: 11 }, { id: 'p14', name: 'איתמר', number: 14 }
+            { id: 'p1', name: 'אורי', number: 1 },
+            { id: 'p2', name: 'נועם', number: 4 },
+            { id: 'p3', name: 'איתי', number: 5 },
+            { id: 'p4', name: 'דוד', number: 8 },
+            { id: 'p5', name: 'יהונתן', number: 10 },
+            { id: 'p6', name: 'לביא', number: 7 },
+            { id: 'p7', name: 'אריאל', number: 9 },
+            { id: 'p8', name: 'יוסף', number: 12 },
+            { id: 'p9', name: 'אדם', number: 15 },
+            { id: 'p10', name: 'עומר', number: 20 },
+            { id: 'p11', name: 'רועי', number: 3 },
+            { id: 'p12', name: 'עידו', number: 6 },
+            { id: 'p13', name: 'ינאי', number: 11 },
+            { id: 'p14', name: 'איתמר', number: 14 }
         ];
 
+        // טעינת שחקנים לספסל בעליית העמוד
         window.onload = () => {
             const bench = document.getElementById('bench');
             playersData.forEach(player => {
@@ -255,11 +236,16 @@
                 playerEl.draggable = true;
                 playerEl.id = player.id;
                 playerEl.ondragstart = drag;
-                playerEl.innerHTML = `<div class="player-number">${player.number}</div><div class="player-name">${player.name}</div>`;
+                
+                playerEl.innerHTML = `
+                    <div class="player-number">${player.number}</div>
+                    <div class="player-name">${player.name}</div>
+                `;
                 bench.appendChild(playerEl);
             });
         };
 
+        // פונקציות גרירה (Drag & Drop)
         function allowDrop(ev) {
             ev.preventDefault();
             if (ev.target.classList.contains('drop-zone') || ev.target.id === 'bench') {
@@ -273,26 +259,35 @@
 
         function drop(ev) {
             ev.preventDefault();
+            
+            // הסרת אפקט הריחוף מכל האזורים
             document.querySelectorAll('.drop-zone, #bench').forEach(el => el.classList.remove('drag-over'));
+
             const data = ev.dataTransfer.getData("text");
             const draggedElement = document.getElementById(data);
             
-            let target = ev.target;
-            if (!target.classList.contains('drop-zone') && !target.id === 'bench') {
-                target = target.closest('.drop-zone') || target.closest('#bench');
-            }
-
-            if (target && target.classList.contains('drop-zone')) {
-                if (target.children.length === 0) {
-                    target.appendChild(draggedElement);
+            // בדיקה האם זורקים לתוך עמדה חוקית במגרש או חזרה לספסל
+            if (ev.target.classList.contains('drop-zone')) {
+                // אם העמדה תפוסה, לא נאפשר זריקה (או שאפשר לפתח החלפה)
+                if (ev.target.children.length === 0) {
+                    ev.target.appendChild(draggedElement);
                 }
-            } else if (target && (target.id === 'bench' || target.classList.contains('bench-container'))) {
+            } else if (ev.target.id === 'bench' || ev.target.classList.contains('bench-container')) {
                 document.getElementById('bench').appendChild(draggedElement);
             }
         }
 
-        function saveGame() {
-            alert("המערכים של Touchline נשמרו בהצלחה!");
+        // הסרת עיצוב הריחוף כאשר העכבר עוזב את האזור
+        document.addEventListener('dragleave', function(ev) {
+            if (ev.target.classList.contains('drop-zone') || ev.target.id === 'bench') {
+                ev.target.classList.remove('drag-over');
+            }
+        });
+
+        // פונקציית מעבר למשחק
+        function startGame() {
+            alert("הנתונים נשמרו! כאן תתבצע העברה לדשבורד המשחק בזמן אמת.");
+            // בהמשך: איסוף מערך השחקנים מכל מגרש והעברה ל-LocalStorage
         }
     </script>
 </body>
