@@ -2,157 +2,297 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchline - Soccer Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Touchline - Tactical Board</title>
+    <!-- טעינת ספריית עזר לגרירה במגע (חשוב במיוחד לאייפד) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/drag-drop-touch/1.1.0/drag-droptouch.js"></script>
     <style>
         :root {
-            --primary-color: #2e7d32;
-            --accent-color: #ffd700;
-            --bg-color: #f4f4f9;
+            --primary: #2ecc71;
+            --pitch-bg: #27ae60;
+            --bench-bg: #34495e;
+            --player-bg: #f1c40f;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
+            padding: 10px;
+            background-color: #ecf0f1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
-        /* עיצוב כותרת הלוגו */
-        .header-container {
+        /* עיצוב הלוגו החדש */
+        header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
-        .logo {
-            font-size: 4rem;
+        .logo-container {
+            display: inline-block;
+        }
+
+        .logo-text {
+            font-size: 3.5rem;
             font-weight: 900;
-            color: #333;
+            color: var(--text-dark);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            margin-bottom: 0;
+            letter-spacing: -2px;
+            margin: 0;
         }
 
-        .ball {
+        .ball-o {
             display: inline-block;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: white;
-            border: 3px solid #333;
+            border: 3px solid var(--text-dark);
             border-radius: 50%;
+            margin: 0 2px;
             position: relative;
-            animation: bounce 1.5s infinite ease-in-out;
+            animation: bounce 1.2s infinite ease-in-out;
             background-image: 
                 radial-gradient(circle at 50% 50%, transparent 60%, #333 62%),
                 linear-gradient(45deg, transparent 45%, #333 48%, #333 52%, transparent 55%),
                 linear-gradient(-45deg, transparent 45%, #333 48%, #333 52%, transparent 55%);
-            background-size: 100% 100%;
         }
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: -10px;
-            font-weight: 300;
+        .creator-tag {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: -5px;
+            font-weight: 500;
         }
 
-        /* ממשק ניהול */
-        .dashboard {
-            width: 100%;
-            max-width: 800px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        /* ספסל */
+        .bench-container {
+            background-color: var(--bench-bg);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            min-height: 70px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        .bench-title {
+            color: var(--text-light);
+            font-weight: bold;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        /* מגרשים */
+        .pitches-wrapper {
+            display: flex;
             gap: 15px;
-            margin-top: 20px;
+            flex: 1;
+            min-height: 0;
         }
 
-        .stat-card {
-            background: var(--primary-color);
-            color: white;
+        .pitch {
+            flex: 1;
+            background-color: var(--pitch-bg);
+            border: 3px solid #fff;
+            border-radius: 8px;
+            position: relative;
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            padding: 10px;
+            gap: 5px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
+        }
+
+        .pitch-label {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            color: rgba(255,255,255,0.4);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .zone-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .drop-zone {
+            width: 65px;
+            height: 65px;
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(255,255,255,0.2);
+            border-style: solid;
+        }
+
+        /* כרטיס שחקן */
+        .player-card {
+            background-color: var(--player-bg);
+            color: var(--text-dark);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .player-number { font-size: 1rem; }
+        .player-name { font-size: 0.6rem; text-align: center; }
+
+        .actions {
             padding: 15px;
-            border-radius: 10px;
             text-align: center;
         }
 
-        button {
-            background: var(--primary-color);
+        .btn-start {
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: opacity 0.2s;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            font-weight: bold;
         }
 
-        button:active {
-            opacity: 0.8;
-        }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <h1 class="logo">T<span class="ball"></span>uchline</h1>
-        <div class="subtitle">By Idan Biton</div>
+    <header>
+        <div class="logo-container">
+            <h1 class="logo-text">T<span class="ball-o"></span>uchline</h1>
+            <div class="creator-tag">By Idan Biton</div>
+        </div>
+    </header>
+
+    <div class="bench-container" id="bench" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div class="bench-title">ספסל רובי שפירא:</div>
     </div>
 
-    <div class="dashboard">
-        <h2>לוח בקרה - ניהול משחק</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>תוצאה</h3>
-                <p id="score">0 - 0</p>
-                <button onclick="addGoal()">גול!</button>
+    <div class="pitches-wrapper">
+        <!-- מגרש 1 -->
+        <div class="pitch">
+            <div class="pitch-label">מגרש 1</div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="zone-row">
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
-            <div class="stat-card">
-                <h3>זמן משחק</h3>
-                <p id="timer">00:00</p>
-                <button onclick="toggleTimer()">הפעל/עצור</button>
+            <div class="zone-row">
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+        </div>
+
+        <!-- מגרש 2 -->
+        <div class="pitch">
+            <div class="pitch-label">מגרש 2</div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+            <div class="zone-row">
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            <div class="zone-row">
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
         </div>
     </div>
 
-    <script>
-        let score = 0;
-        let seconds = 0;
-        let timerInterval;
-        let isRunning = false;
+    <div class="actions">
+        <button class="btn-start" onclick="saveGame()">שמור והמשך</button>
+    </div>
 
-        function addGoal() {
-            score++;
-            document.getElementById('score').innerText = score + " - 0";
+    <script>
+        const playersData = [
+            { id: 'p1', name: 'אורי', number: 1 }, { id: 'p2', name: 'נועם', number: 4 },
+            { id: 'p3', name: 'איתי', number: 5 }, { id: 'p4', name: 'דוד', number: 8 },
+            { id: 'p5', name: 'יהונתן', number: 10 }, { id: 'p6', name: 'לביא', number: 7 },
+            { id: 'p7', name: 'אריאל', number: 9 }, { id: 'p8', name: 'יוסף', number: 12 },
+            { id: 'p9', name: 'אדם', number: 15 }, { id: 'p10', name: 'עומר', number: 20 },
+            { id: 'p11', name: 'רועי', number: 3 }, { id: 'p12', name: 'עידו', number: 6 },
+            { id: 'p13', name: 'ינאי', number: 11 }, { id: 'p14', name: 'איתמר', number: 14 }
+        ];
+
+        window.onload = () => {
+            const bench = document.getElementById('bench');
+            playersData.forEach(player => {
+                const playerEl = document.createElement('div');
+                playerEl.className = 'player-card';
+                playerEl.draggable = true;
+                playerEl.id = player.id;
+                playerEl.ondragstart = drag;
+                playerEl.innerHTML = `<div class="player-number">${player.number}</div><div class="player-name">${player.name}</div>`;
+                bench.appendChild(playerEl);
+            });
+        };
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            if (ev.target.classList.contains('drop-zone') || ev.target.id === 'bench') {
+                ev.target.classList.add('drag-over');
+            }
         }
 
-        function toggleTimer() {
-            if (isRunning) {
-                clearInterval(timerInterval);
-            } else {
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    let mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-                    let secs = (seconds % 60).toString().padStart(2, '0');
-                    document.getElementById('timer').innerText = `${mins}:${secs}`;
-                }, 1000);
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            document.querySelectorAll('.drop-zone, #bench').forEach(el => el.classList.remove('drag-over'));
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            
+            let target = ev.target;
+            if (!target.classList.contains('drop-zone') && !target.id === 'bench') {
+                target = target.closest('.drop-zone') || target.closest('#bench');
             }
-            isRunning = !isRunning;
+
+            if (target && target.classList.contains('drop-zone')) {
+                if (target.children.length === 0) {
+                    target.appendChild(draggedElement);
+                }
+            } else if (target && (target.id === 'bench' || target.classList.contains('bench-container'))) {
+                document.getElementById('bench').appendChild(draggedElement);
+            }
+        }
+
+        function saveGame() {
+            alert("המערכים של Touchline נשמרו בהצלחה!");
         }
     </script>
 </body>
