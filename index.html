@@ -7,7 +7,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Touchline - מערכת לניהול משחק</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- ספרייה לקריאת קבצי Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -38,7 +37,7 @@
                 </button>
 
                 <div class="system-info">
-                    <span>גרסה 1.3</span> | <span>&copy; 2026 by Idan Biton</span>
+                    <span>גרסה 1.4</span> | <span>&copy; 2026 by Idan Biton</span>
                 </div>
             </div>
         </main>
@@ -68,7 +67,6 @@
                             <label>סגל הקבוצה (שם ומספר)</label>
                             <div class="players-actions">
                                 <button type="button" id="btn-load-excel" class="ios-button-small">טען מאקסל (.xlsx)</button>
-                                <!-- תמיכה באקסל ו-CSV -->
                                 <input type="file" id="file-excel" accept=".xlsx, .xls, .csv" style="display:none;">
                                 <button type="button" id="btn-load-default" class="ios-button-small">טען סגל שמור</button>
                             </div>
@@ -116,8 +114,8 @@
                     </div>
                 </div>
 
-                <div class="bench-area glass-panel">
-                    <h3>ספסל שחקנים (בחר שחקן ואז לחץ על עמדה)</h3>
+                <div id="bench-area" class="bench-area glass-panel">
+                    <h3>ספסל שחקנים (בחר שחקן -> החלף, או לחץ כאן להחזרה לספסל)</h3>
                     <div id="bench-players" class="bench-players-list"></div>
                 </div>
             </div>
