@@ -87,14 +87,30 @@
             </div>
         </main>
         
-        <!-- מסך תכנון הרכב (הכנה לשלב הבא) -->
+        <!-- מסך תכנון הרכב (הכנה לשלב הבא) -->        <!-- מסך תכנון הרכב -->
         <main id="lineup-screen" class="screen">
-            <div class="glass-panel" style="padding: 40px; text-align: center;">
-                <h2>תכנון הרכב</h2>
-                <p>הנתונים נשמרו בהצלחה! כאן נבנה את תצוגת המגרשים והגרירה.</p>
+            <div class="lineup-container">
+                <div class="lineup-header glass-panel">
+                    <h2>תכנון הרכב פותח</h2>
+                    <button id="btn-start-match" class="ios-button primary-action">התחל משחק ⚽️</button>
+                </div>
+                
+                <div class="tactical-area">
+                    <!-- ספסל מחליפים (יוצג בצד ימין) -->
+                    <div class="bench-area glass-panel">
+                        <h3>ספסל שחקנים</h3>
+                        <div id="bench-players" class="bench-players-list">
+                            <!-- שחקנים ייטענו לכאן דינמית -->
+                        </div>
+                    </div>
+
+                    <!-- אזור המגרשים שייווצר דינמית -->
+                    <div id="pitches-container" class="pitches-wrapper">
+                        <!-- המגרשים ירונדרו דרך JS -->
+                    </div>
+                </div>
             </div>
         </main>
 
-    <script src="app.js"></script>
 </body>
 </html>
