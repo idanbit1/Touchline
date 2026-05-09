@@ -37,7 +37,7 @@
                 </button>
 
                 <div class="system-info">
-                    <span>גרסה 1.4</span> | <span>&copy; 2026 by Idan Biton</span>
+                    <span>גרסה 1.5</span> | <span>&copy; 2026 by Idan Biton</span>
                 </div>
             </div>
         </main>
@@ -106,6 +106,9 @@
                     <span class="divider">|</span>
                     <button type="button" class="ios-button-small save-lineup" data-slot="3">שמור 3</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="3">טען 3</button>
+                    <span class="divider">|</span>
+                    <!-- לחצן נקה הרכב -->
+                    <button type="button" id="btn-clear-lineup" class="ios-button-small" style="color: #ff453a; border-color: #ff453a; background: rgba(255, 69, 58, 0.15);">נקה הרכב 🗑️</button>
                 </div>
                 
                 <div class="tactical-area">
@@ -118,6 +121,73 @@
                     <h3>ספסל שחקנים (בחר שחקן -> החלף, או לחץ כאן להחזרה לספסל)</h3>
                     <div id="bench-players" class="bench-players-list"></div>
                 </div>
+            </div>
+        </main>
+
+        <!-- 4. מסך דשבורד משחק חי -->
+        <main id="live-match-screen" class="screen">
+            <div class="live-container">
+                
+                <!-- לוח תוצאות ושעון עצר -->
+                <div class="live-header glass-panel">
+                    <div class="score-board">
+                        <div class="score-box secondary-score">
+                            <span>מגרש 1</span>
+                            <div id="score-pitch-1" class="score-numbers">0 - 0</div>
+                        </div>
+                        <div class="score-box main-score">
+                            <span>תוצאה כוללת</span>
+                            <div id="score-total" class="score-numbers highlight-score">0 - 0</div>
+                        </div>
+                        <div class="score-box secondary-score">
+                            <span>מגרש 2</span>
+                            <div id="score-pitch-2" class="score-numbers">0 - 0</div>
+                        </div>
+                    </div>
+
+                    <div class="match-controls">
+                        <div id="stopwatch-display" class="stopwatch">00:00</div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="btn-play-pause-timer" class="ios-button primary-action">התחל משחק</button>
+                            <button id="btn-end-half" class="ios-button" style="background: #ff453a; color: white;">סיום מחצית</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- אזור טקטי וסטטיסטיקות במקביל -->
+                <div class="live-body">
+                    <div class="live-pitches-area">
+                        <div id="live-pitches-container" class="pitches-wrapper">
+                            <!-- המגרשים יועברו לכאן ברגע התחלת המשחק -->
+                        </div>
+                        <div id="live-bench-area" class="bench-area glass-panel" style="margin-top: 10px;">
+                            <h3>ספסל מחליפים</h3>
+                            <div id="live-bench-players" class="bench-players-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- טבלת אחוזי משחק -->
+                    <div class="live-stats-area glass-panel">
+                        <h3>זמן משחק ונתונים</h3>
+                        <div class="table-responsive">
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>מס'</th>
+                                        <th>שם שחקן</th>
+                                        <th>דקות</th>
+                                        <th>% משחק</th>
+                                        <th>⚽️</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stats-table-body">
+                                    <!-- שורות השחקנים ייווצרו דינמית -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </main>
     </div>
