@@ -1,5 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- ניהול מסך מלא (Fullscreen) ---
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    btnFullscreen.addEventListener('click', () => {
+        const doc = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            // כניסה למסך מלא (תמיכה גם באפל)
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+            btnFullscreen.textContent = 'יציאה ממסך מלא ↙️';
+        } else {
+            // יציאה ממסך מלא
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            btnFullscreen.textContent = 'מסך מלא 🔲';
+        }
+    });
+
     // --- ניהול שעון המערכת ---
     function updateClock() {
         const now = new Date();
@@ -8,16 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if(timeDisplay) timeDisplay.textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         if(dateDisplay) dateDisplay.textContent = now.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
-    setInterval(updateClock, 1000); 
-    updateClock();
+    setInterval(updateClock, 1000); updateClock();
 
-    // --- ניהול מסכים וווידג'ט צף ---
+    // --- ניהול מסכים ---
     const homeScreen = document.getElementById('home-screen');
     const setupScreen = document.getElementById('setup-screen');
     const lineupScreen = document.getElementById('lineup-screen');
     const activeMatchWidget = document.getElementById('btn-resume-match');
     
-    // בדיקה האם יש משחק בתהליך בזיכרון
     if(localStorage.getItem('tacticalMatchData')) {
         activeMatchWidget.classList.remove('hidden');
     }
@@ -28,18 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => showScreen.classList.add('active'), 50);
     }
 
-    // ניווט בסיסי
+    // ניווט
     document.getElementById('btn-new-match').addEventListener('click', () => switchScreen(homeScreen, setupScreen));
     document.getElementById('btn-back-home').addEventListener('click', () => switchScreen(setupScreen, homeScreen));
     document.getElementById('btn-back-setup').addEventListener('click', () => switchScreen(lineupScreen, setupScreen));
+    document.getElementById('btn-back-home-lineup').addEventListener('click', () => switchScreen(lineupScreen, homeScreen)); // הלחצן החדש
     
-    // חזרה למשחק פעיל מהחלון הצף
     activeMatchWidget.addEventListener('click', () => {
         initLineupBuilder();
         switchScreen(homeScreen, lineupScreen);
     });
 
-    // --- טופס הגדרות וניהול שחקנים דינמי ---
+    // --- טופס הגדרות וניהול שחקנים ---
     const playersContainer = document.getElementById('players-list-container');
     const btnAddPlayer = document.getElementById('btn-add-player');
     const btnLoadDefault = document.getElementById('btn-load-default');
@@ -56,18 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
         playersContainer.appendChild(row);
     }
 
-    // שורות ריקות בברירת מחדל
     if(playersContainer.children.length === 0) {
         createPlayerRow(); createPlayerRow(); createPlayerRow();
     }
 
     btnAddPlayer.addEventListener('click', () => createPlayerRow());
 
-    // טעינת סגל מ-CSV
-    const btnLoadCSV = document.getElementById('btn-load-csv');
-    const fileCSV = document.getElementById('file-csv');
-    btnLoadCSV.addEventListener('click', () => fileCSV.click());
-    fileCSV.addEventListener('change', (e) => {
+    // טעינת מ-CSV
+    document.getElementById('btn-load-csv').addEventListener('click', () => document.getElementById('file-csv').click());
+    document.getElementById('file-csv').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if(!file) return;
         const reader = new FileReader();
@@ -93,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // שמירת ההגדרות ומעבר לתכנון הרכב
     document.getElementById('setup-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -113,15 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         localStorage.setItem('tacticalMatchData', JSON.stringify(matchData));
         localStorage.setItem('tacticalPlayers', JSON.stringify(playersArray));
-        localStorage.setItem('defaultRoster', JSON.stringify(playersArray)); // שומר סגל קבוע
+        localStorage.setItem('defaultRoster', JSON.stringify(playersArray)); 
 
         activeMatchWidget.classList.remove('hidden');
-
         initLineupBuilder();
         switchScreen(setupScreen, lineupScreen);
     });
 
-    // --- מערכת ההרכב: לחיצה ובחירה (Tap to Select) ---
+    // --- מערכת ההרכב: לחיצה ובחירה ---
     let selectedPlayerCard = null;
 
     function initLineupBuilder() {
@@ -133,20 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
         pitchesContainer.innerHTML = ''; 
         benchContainer.innerHTML = '';
 
-        // טעינת שחקנים לספסל
         players.forEach(player => {
             const card = document.createElement('div');
             card.className = 'player-card';
             card.id = player.id;
             card.innerHTML = `<div class="player-number">${player.number}</div><div class="player-name">${player.name}</div>`;
             
-            // לוגיקת בחירת שחקן
             card.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if(selectedPlayerCard) selectedPlayerCard.classList.remove('selected');
                 
                 if(selectedPlayerCard === this) {
-                    selectedPlayerCard = null; // ביטול אם נלחץ שוב
+                    selectedPlayerCard = null; 
                 } else {
                     selectedPlayerCard = this;
                     this.classList.add('selected');
@@ -155,13 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
             benchContainer.appendChild(card);
         });
 
-        // יצירת 2 חצאי מגרשים ימין ושמאל
         for(let i = 1; i <= 2; i++) {
             const pitch = document.createElement('div');
             pitch.className = 'pitch-half';
             pitch.id = `pitch_${i}`;
             
-            // סידור עמדות מלמעלה למטה: חלוץ (1), קשרים (2), מגנים (2), בלם (1), שוער (1)
             const rows = [1, 2, 2, 1, 1];
             let zoneIndex = 0;
 
@@ -174,21 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     zone.className = 'drop-zone';
                     zone.id = `zone_${i}_${zoneIndex++}`;
 
-                    // שיבוץ שחקן בלחיצה על העמדה
                     zone.addEventListener('click', function(e) {
                         e.stopPropagation();
                         if(!selectedPlayerCard) {
-                            // אם לחצו על עמדה עם שחקן בלי לבחור מחליף, החזר לספסל
-                            if(this.children.length > 0) {
-                                benchContainer.appendChild(this.children[0]);
-                            }
+                            if(this.children.length > 0) benchContainer.appendChild(this.children[0]);
                             return;
                         }
 
-                        // אם יש כבר שחקן בעמדה, החזר אותו לספסל
-                        if(this.children.length > 0) {
-                            benchContainer.appendChild(this.children[0]);
-                        }
+                        if(this.children.length > 0) benchContainer.appendChild(this.children[0]);
                         
                         this.appendChild(selectedPlayerCard);
                         selectedPlayerCard.classList.remove('selected');
@@ -202,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchesContainer.appendChild(pitch);
         }
 
-        // לחיצה על אזור ריק תבטל את הבחירה
         document.body.addEventListener('click', () => {
             if(selectedPlayerCard) {
                 selectedPlayerCard.classList.remove('selected');
@@ -211,15 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- שמירה וטעינה של 3 הרכבים שונים ---
+    // --- שמירה וטעינה של הרכבים ---
     document.querySelectorAll('.save-lineup').forEach(btn => {
         btn.addEventListener('click', function() {
             const slot = this.getAttribute('data-slot');
             const state = [];
             document.querySelectorAll('.drop-zone').forEach(zone => {
-                if(zone.children.length > 0) {
-                    state.push({ zoneId: zone.id, playerId: zone.children[0].id });
-                }
+                if(zone.children.length > 0) state.push({ zoneId: zone.id, playerId: zone.children[0].id });
             });
             localStorage.setItem(`savedLineup_${slot}`, JSON.stringify(state));
             alert(`ההרכב נשמר בהצלחה במשבצת ${slot}`);
@@ -236,10 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const bench = document.getElementById('bench-players');
-            // החזר את כולם לספסל לפני הטעינה
             document.querySelectorAll('.drop-zone .player-card').forEach(p => bench.appendChild(p));
 
-            // שיבוץ לפי השמירה
             state.forEach(item => {
                 const zone = document.getElementById(item.zoneId);
                 const player = document.getElementById(item.playerId);
