@@ -3,292 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TacticalBoard - תכנון הרכב</title>
+    <title>Touchline Management System</title>
     <style>
         :root {
-            --primary: #2ecc71;
-            --pitch-bg: #27ae60;
-            --bench-bg: #34495e;
-            --player-bg: #f1c40f;
-            --text-light: #ecf0f1;
-            --text-dark: #2c3e50;
+            --pitch-green: #2ecc71;
+            --pitch-lines: rgba(255,255,255,0.8);
+            --dark-blue: #2c3e50;
+            --accent-gold: #f1c40f;
+            --white: #ffffff;
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #ecf0f1;
+            padding: 0;
+            background-color: #f0f3f5;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-            user-select: none;
         }
 
+        /* --- לוגו וכותרת --- */
         header {
-            text-align: center;
-            margin-bottom: 20px;
-            color: var(--text-dark);
-        }
-
-        /* ספסל השחקנים */
-        .bench-container {
-            background-color: var(--bench-bg);
+            background: var(--dark-blue);
             padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            min-height: 80px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
             display: flex;
-            gap: 10px;
-            overflow-x: auto;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            justify-content: center;
+            margin: 0;
+            letter-spacing: -1px;
         }
 
-        .bench-title {
-            color: var(--text-light);
+        .ball-o {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 5px;
+            position: relative;
+            display: inline-block;
+            border: 2px solid #000;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #fff 20%, #000 21%, #000 25%, transparent 26%),
+                radial-gradient(circle at 10% 30%, #000 15%, transparent 16%),
+                radial-gradient(circle at 90% 30%, #000 15%, transparent 16%),
+                radial-gradient(circle at 50% 90%, #000 15%, transparent 16%);
+            animation: bounce 1s infinite alternate cubic-bezier(.5,0,.5,1);
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+
+        .by-line {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: -5px;
+        }
+
+        /* --- ניהול תצוגות --- */
+        .view { display: none; padding: 20px; flex: 1; overflow-y: auto; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* --- עמוד בית --- */
+        .setup-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 40px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--pitch-green);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin-left: 15px;
-            white-space: nowrap;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
         }
 
-        /* מגרשים */
-        .pitches-wrapper {
+        /* --- לוח טקטי --- */
+        .tactical-container { display: flex; gap: 20px; height: 100%; }
+        .bench {
+            width: 200px;
+            background: #dfe6e9;
+            padding: 15px;
+            border-radius: 15px;
             display: flex;
-            gap: 20px;
-            flex: 1;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .pitch {
             flex: 1;
-            background-color: var(--pitch-bg);
-            border: 4px solid #fff;
-            border-radius: 8px;
+            background-color: var(--pitch-green);
+            border: 4px solid var(--white);
+            border-radius: 15px;
             position: relative;
+            background-image: 
+                linear-gradient(var(--pitch-lines) 2px, transparent 2px),
+                linear-gradient(90deg, var(--pitch-lines) 2px, transparent 2px);
+            background-size: 50% 50%;
             display: grid;
-            grid-template-rows: 1fr 1fr 1fr 1fr; /* שוער, הגנה, קישור, התקפה */
+            grid-template-rows: repeat(4, 1fr);
             padding: 20px;
-            gap: 10px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.2);
         }
 
-        .pitch-title {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.2);
-            font-size: 3rem;
-            font-weight: bold;
-            pointer-events: none;
-        }
-
-        /* עמדות במגרש (Drop Zones) */
-        .zone-row {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .drop-zone {
-            width: 80px;
-            height: 80px;
-            border: 2px dashed rgba(255,255,255,0.6);
+        .player-slot {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed rgba(255,255,255,0.5);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.2s;
+            margin: auto;
         }
 
-        .drop-zone.drag-over {
-            background-color: rgba(255,255,255,0.3);
-            border-style: solid;
-        }
-
-        /* כרטיס שחקן (Draggable) */
-        .player-card {
-            background-color: var(--player-bg);
-            color: var(--text-dark);
-            width: 70px;
-            height: 70px;
+        .player-token {
+            width: 55px;
+            height: 55px;
+            background: var(--accent-gold);
             border-radius: 50%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            font-weight: bold;
-            cursor: grab;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-        }
-
-        .player-card:active {
-            cursor: grabbing;
-            transform: scale(1.1);
-        }
-
-        .player-number {
-            font-size: 1.2rem;
-            margin-bottom: 2px;
-        }
-
-        .player-name {
+            justify-content: center;
             font-size: 0.7rem;
-            text-align: center;
-            line-height: 1;
-        }
-
-        .actions {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .btn-start {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 2px solid #333;
         }
 
+        .player-token.selected { border: 4px solid #fff; transform: scale(1.1); }
+
+        /* --- לוח משחק --- */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--dark-blue);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-box { font-size: 4rem; font-weight: bold; }
+        .game-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .action-btn {
+            padding: 20px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            border: none;
+            font-weight: bold;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>⚽ TacticalBoard - תכנון הרכבים (7x7)</h1>
-    </header>
+<header>
+    <div class="logo">T<span class="ball-o"></span>uchline</div>
+    <div class="by-line">By Idan Biton</div>
+</header>
 
-    <!-- ספסל השחקנים -->
-    <div class="bench-container" id="bench" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="bench-title">ספסל (רובי שפירא):</div>
-        <!-- שחקנים יוזרקו לכאן באמצעות JavaScript -->
+<!-- עמוד 1: הגדרות -->
+<div id="view-home" class="view active">
+    <div class="setup-card">
+        <h2>הגדרות משחק חדש</h2>
+        <input type="text" id="teamA-name" placeholder="שם קבוצה א' (למשל: רובי שפירא)" value="רובי שפירא">
+        <input type="text" id="teamB-name" placeholder="שם קבוצה ב'" value="אורחים">
+        <input type="number" id="game-duration" placeholder="זמן משחק (דקות)" value="20">
+        <button class="btn" onclick="showView('view-tactical')">המשך לבחירת הרכב</button>
     </div>
+</div>
 
-    <!-- מגרשים -->
-    <div class="pitches-wrapper">
-        <!-- מגרש 1 -->
-        <div class="pitch">
-            <div class="pitch-title">מגרש 1</div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="FW"></div></div>
-            <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
-            </div>
-            <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
-            </div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="GK"></div></div>
+<!-- עמוד 2: לוח טקטי -->
+<div id="view-tactical" class="view">
+    <div class="tactical-container">
+        <div class="bench" id="bench-list">
+            <h3>ספסל</h3>
+            <!-- שחקנים יוזרקו כאן -->
         </div>
-
-        <!-- מגרש 2 -->
         <div class="pitch">
-            <div class="pitch-title">מגרש 2</div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="FW"></div></div>
-            <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="MID"></div>
+            <div class="zone-row" style="display: flex; justify-content: space-around;">
+                <div class="player-slot" onclick="placePlayer(this)"></div>
             </div>
-            <div class="zone-row">
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
-                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="DEF"></div>
+            <div class="zone-row" style="display: flex; justify-content: space-around;">
+                <div class="player-slot" onclick="placePlayer(this)"></div>
+                <div class="player-slot" onclick="placePlayer(this)"></div>
             </div>
-            <div class="zone-row"><div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-position="GK"></div></div>
+            <div class="zone-row" style="display: flex; justify-content: space-around;">
+                <div class="player-slot" onclick="placePlayer(this)"></div>
+                <div class="player-slot" onclick="placePlayer(this)"></div>
+            </div>
+            <div class="zone-row" style="display: flex; justify-content: space-around;">
+                <div class="player-slot" onclick="placePlayer(this)"></div>
+            </div>
+            <button class="btn" onclick="showView('view-game')">התחל משחק!</button>
         </div>
     </div>
+</div>
 
-    <div class="actions">
-        <button class="btn-start" onclick="startGame()">שמור הרכבים והתחל משחק</button>
+<!-- עמוד 3: לוח משחק פעיל -->
+<div id="view-game" class="view">
+    <div class="scoreboard">
+        <div id="display-teamA">קבוצה א</div>
+        <div class="score-box" id="score-text">0 - 0</div>
+        <div id="display-teamB">קבוצה ב</div>
     </div>
+    <div style="text-align:center; font-size: 2rem; margin-bottom: 20px;" id="game-timer">20:00</div>
+    
+    <div class="game-actions">
+        <button class="action-btn" style="background:#e74c3c" onclick="updateScore('A')">⚽ גול לקבוצה א'</button>
+        <button class="action-btn" style="background:#3498db" onclick="updateScore('B')">⚽ גול לקבוצה ב'</button>
+        <button class="action-btn" style="background:#f1c40f; color: black;" onclick="logEvent('כרטיס צהוב')">🟨 צהוב</button>
+        <button class="action-btn" style="background:#c0392b" onclick="logEvent('כרטיס אדום')">🟥 אדום</button>
+    </div>
+</div>
 
-    <script>
-        // רשימת שחקנים (שם ומספר בלבד)
-        const playersData = [
-            { id: 'p1', name: 'אורי', number: 1 },
-            { id: 'p2', name: 'נועם', number: 4 },
-            { id: 'p3', name: 'איתי', number: 5 },
-            { id: 'p4', name: 'דוד', number: 8 },
-            { id: 'p5', name: 'יהונתן', number: 10 },
-            { id: 'p6', name: 'לביא', number: 7 },
-            { id: 'p7', name: 'אריאל', number: 9 },
-            { id: 'p8', name: 'יוסף', number: 12 },
-            { id: 'p9', name: 'אדם', number: 15 },
-            { id: 'p10', name: 'עומר', number: 20 },
-            { id: 'p11', name: 'רועי', number: 3 },
-            { id: 'p12', name: 'עידו', number: 6 },
-            { id: 'p13', name: 'ינאי', number: 11 },
-            { id: 'p14', name: 'איתמר', number: 14 }
-        ];
+<script>
+    let selectedPlayer = null;
+    let scoreA = 0;
+    let scoreB = 0;
 
-        // טעינת שחקנים לספסל בעליית העמוד
-        window.onload = () => {
-            const bench = document.getElementById('bench');
-            playersData.forEach(player => {
-                const playerEl = document.createElement('div');
-                playerEl.className = 'player-card';
-                playerEl.draggable = true;
-                playerEl.id = player.id;
-                playerEl.ondragstart = drag;
-                
-                playerEl.innerHTML = `
-                    <div class="player-number">${player.number}</div>
-                    <div class="player-name">${player.name}</div>
-                `;
-                bench.appendChild(playerEl);
-            });
+    const players = [
+        {name: 'אורי', num: 1}, {name: 'נועם', num: 4}, {name: 'איתי', num: 5},
+        {name: 'דוד', num: 8}, {name: 'יהונתן', num: 10}, {name: 'לביא', num: 7},
+        {name: 'אריאל', num: 9}
+    ];
+
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        
+        if(viewId === 'view-game') {
+            document.getElementById('display-teamA').innerText = document.getElementById('teamA-name').value;
+            document.getElementById('display-teamB').innerText = document.getElementById('teamB-name').value;
+        }
+    }
+
+    // יצירת שחקנים בספסל
+    const bench = document.getElementById('bench-list');
+    players.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'player-token';
+        div.innerHTML = `<span>${p.num}</span><span>${p.name}</span>`;
+        div.onclick = () => {
+            document.querySelectorAll('.player-token').forEach(t => t.classList.remove('selected'));
+            div.classList.add('selected');
+            selectedPlayer = div;
         };
+        bench.appendChild(div);
+    });
 
-        // פונקציות גרירה (Drag & Drop)
-        function allowDrop(ev) {
-            ev.preventDefault();
-            if (ev.target.classList.contains('drop-zone') || ev.target.id === 'bench') {
-                ev.target.classList.add('drag-over');
-            }
+    function placePlayer(slot) {
+        if(selectedPlayer && slot.children.length === 0) {
+            const clone = selectedPlayer.cloneNode(true);
+            clone.classList.remove('selected');
+            slot.appendChild(clone);
+            selectedPlayer.style.opacity = "0.4";
+            selectedPlayer.onclick = null;
+            selectedPlayer = null;
         }
+    }
 
-        function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
-        }
+    function updateScore(team) {
+        if(team === 'A') scoreA++; else scoreB++;
+        document.getElementById('score-text').innerText = `${scoreA} - ${scoreB}`;
+    }
 
-        function drop(ev) {
-            ev.preventDefault();
-            
-            // הסרת אפקט הריחוף מכל האזורים
-            document.querySelectorAll('.drop-zone, #bench').forEach(el => el.classList.remove('drag-over'));
+    function logEvent(type) {
+        alert("אירוע נרשם: " + type);
+    }
+</script>
 
-            const data = ev.dataTransfer.getData("text");
-            const draggedElement = document.getElementById(data);
-            
-            // בדיקה האם זורקים לתוך עמדה חוקית במגרש או חזרה לספסל
-            if (ev.target.classList.contains('drop-zone')) {
-                // אם העמדה תפוסה, לא נאפשר זריקה (או שאפשר לפתח החלפה)
-                if (ev.target.children.length === 0) {
-                    ev.target.appendChild(draggedElement);
-                }
-            } else if (ev.target.id === 'bench' || ev.target.classList.contains('bench-container')) {
-                document.getElementById('bench').appendChild(draggedElement);
-            }
-        }
-
-        // הסרת עיצוב הריחוף כאשר העכבר עוזב את האזור
-        document.addEventListener('dragleave', function(ev) {
-            if (ev.target.classList.contains('drop-zone') || ev.target.id === 'bench') {
-                ev.target.classList.remove('drag-over');
-            }
-        });
-
-        // פונקציית מעבר למשחק
-        function startGame() {
-            alert("הנתונים נשמרו! כאן תתבצע העברה לדשבורד המשחק בזמן אמת.");
-            // בהמשך: איסוף מערך השחקנים מכל מגרש והעברה ל-LocalStorage
-        }
-    </script>
 </body>
 </html>
