@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- מסך מלא ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
     btnFullscreen.addEventListener('click', () => {
         const doc = document.documentElement;
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- שעון ---
     function updateClock() {
         const now = new Date();
         const timeDisplay = document.getElementById('live-time');
@@ -25,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(updateClock, 1000); updateClock();
 
-    // --- ניהול מסכים ---
     const homeScreen = document.getElementById('home-screen');
     const setupScreen = document.getElementById('setup-screen');
     const lineupScreen = document.getElementById('lineup-screen');
@@ -51,10 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen(homeScreen, lineupScreen);
     });
 
-    // --- טופס הגדרות וניהול שחקנים (כולל טעינת אקסל) ---
     const playersContainer = document.getElementById('players-list-container');
     const btnAddPlayer = document.getElementById('btn-add-player');
-    const btnLoadDefault = document.getElementById('btn-load-default');
 
     function createPlayerRow(name = '', number = '') {
         const row = document.createElement('div');
@@ -73,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     btnAddPlayer.addEventListener('click', () => createPlayerRow());
 
-    // טעינת שחקנים מאקסל (XLSX / CSV) בעזרת SheetJS
     document.getElementById('btn-load-excel').addEventListener('click', () => document.getElementById('file-excel').click());
     document.getElementById('file-excel').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -85,12 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                // המרת הגיליון למערך של מערכים
                 const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
 
                 playersContainer.innerHTML = '';
                 
-                // עובר על השורות, מדלג על כותרת אם יש טקסט בעמודת המספר
                 let startIdx = 0;
                 if(rows.length > 0 && isNaN(parseInt(rows[0][1]))) {
                     startIdx = 1;
@@ -105,17 +97,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (err) {
-                alert('שגיאה בקריאת הקובץ. ודא שזהו קובץ אקסל תקין עם שם בעמודה הראשונה ומספר בשנייה.');
-                console.error(err);
+                alert('שגיאה בקריאת הקובץ. ודא שזהו קובץ אקסל תקין.');
             }
         };
-        // קריאה כ-ArrayBuffer מתאימה לספריית SheetJS
         reader.readAsArrayBuffer(file);
-        e.target.value = ''; // איפוס הקלט לאפשר העלאה חוזרת
+        e.target.value = ''; 
     });
 
-    // טעינת סגל שמור
-    btnLoadDefault.addEventListener('click', () => {
+    document.getElementById('btn-load-default').addEventListener('click', () => {
         const saved = JSON.parse(localStorage.getItem('defaultRoster'));
         if(saved && saved.length > 0) {
             playersContainer.innerHTML = '';
@@ -151,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen(setupScreen, lineupScreen);
     });
 
-    // --- בניית המגרש ושיבוץ (Tap to Select) ---
+    // --- מערכת שיבוץ מתקדמת: החלפות והחזרה לספסל ---
     let selectedPlayerCard = null;
 
     function initLineupBuilder() {
@@ -159,9 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!players) return;
 
         const pitchesContainer = document.getElementById('pitches-container');
-        const benchContainer = document.getElementById('bench-players');
+        const benchPlayersList = document.getElementById('bench-players');
+        const benchArea = document.getElementById('bench-area');
+        
         pitchesContainer.innerHTML = ''; 
-        benchContainer.innerHTML = '';
+        benchPlayersList.innerHTML = '';
 
         players.forEach(player => {
             const card = document.createElement('div');
@@ -169,18 +160,41 @@ document.addEventListener('DOMContentLoaded', () => {
             card.id = player.id;
             card.innerHTML = `<div class="player-number">${player.number}</div><div class="player-name">${player.name}</div>`;
             
+            // לחיצה על שחקן (בחירה, הסרת בחירה או החלפה)
             card.addEventListener('click', function(e) {
                 e.stopPropagation();
-                if(selectedPlayerCard) selectedPlayerCard.classList.remove('selected');
                 
-                if(selectedPlayerCard === this) {
-                    selectedPlayerCard = null; 
+                if (selectedPlayerCard) {
+                    if (selectedPlayerCard === this) {
+                        // ביטול בחירה
+                        selectedPlayerCard.classList.remove('selected');
+                        selectedPlayerCard = null;
+                    } else {
+                        // החלפה (Swap) בין השחקן הנבחר לשחקן שנלחץ עכשיו
+                        const parentA = selectedPlayerCard.parentNode;
+                        const parentB = this.parentNode;
+                        
+                        if (parentA === parentB && parentA === benchPlayersList) {
+                            // אם שניהם בספסל - פשוט בחר את החדש
+                            selectedPlayerCard.classList.remove('selected');
+                            selectedPlayerCard = this;
+                            this.classList.add('selected');
+                        } else {
+                            // ביצוע ההחלפה בפועל
+                            parentB.appendChild(selectedPlayerCard);
+                            parentA.appendChild(this);
+                            
+                            selectedPlayerCard.classList.remove('selected');
+                            selectedPlayerCard = null;
+                        }
+                    }
                 } else {
+                    // בחירת השחקן
                     selectedPlayerCard = this;
                     this.classList.add('selected');
                 }
             });
-            benchContainer.appendChild(card);
+            benchPlayersList.appendChild(card);
         });
 
         for(let i = 1; i <= 2; i++) {
@@ -202,13 +216,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     zone.addEventListener('click', function(e) {
                         e.stopPropagation();
+                        
+                        // אם לחצו על עמדה ואין שחקן נבחר, נבדוק אם יש פה שחקן שאפשר לבחור
                         if(!selectedPlayerCard) {
-                            if(this.children.length > 0) benchContainer.appendChild(this.children[0]);
+                            if(this.children.length > 0) {
+                                selectedPlayerCard = this.children[0];
+                                selectedPlayerCard.classList.add('selected');
+                            }
                             return;
                         }
 
-                        if(this.children.length > 0) benchContainer.appendChild(this.children[0]);
+                        // אם העמדה תפוסה, נחליף ביניהם
+                        if(this.children.length > 0) {
+                            const existingPlayer = this.children[0];
+                            selectedPlayerCard.parentNode.appendChild(existingPlayer);
+                        }
                         
+                        // הצבת השחקן הנבחר
                         this.appendChild(selectedPlayerCard);
                         selectedPlayerCard.classList.remove('selected');
                         selectedPlayerCard = null;
@@ -221,6 +245,16 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchesContainer.appendChild(pitch);
         }
 
+        // לחיצה על אזור הספסל מחזירה את השחקן לספסל
+        benchArea.addEventListener('click', function(e) {
+            if(selectedPlayerCard) {
+                benchPlayersList.appendChild(selectedPlayerCard);
+                selectedPlayerCard.classList.remove('selected');
+                selectedPlayerCard = null;
+            }
+        });
+
+        // לחיצה מחוץ לכל אזור תבטל את הבחירה
         document.body.addEventListener('click', () => {
             if(selectedPlayerCard) {
                 selectedPlayerCard.classList.remove('selected');
@@ -229,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- שמירה וטעינה של הרכבים ---
     document.querySelectorAll('.save-lineup').forEach(btn => {
         btn.addEventListener('click', function() {
             const slot = this.getAttribute('data-slot');
