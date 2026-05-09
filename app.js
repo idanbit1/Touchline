@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- מסך מלא ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
     btnFullscreen.addEventListener('click', () => {
         const doc = document.documentElement;
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- שעון מערכת ---
     function updateClock() {
         const now = new Date();
         const timeDisplay = document.getElementById('live-time');
@@ -23,9 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(updateClock, 1000); updateClock();
 
+    // --- ניהול מסכים ---
     const homeScreen = document.getElementById('home-screen');
     const setupScreen = document.getElementById('setup-screen');
     const lineupScreen = document.getElementById('lineup-screen');
+    const liveMatchScreen = document.getElementById('live-match-screen');
     const activeMatchWidget = document.getElementById('btn-resume-match');
     
     if(localStorage.getItem('tacticalMatchData')) {
@@ -48,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen(homeScreen, lineupScreen);
     });
 
+    // --- טופס הגדרות וניהול שחקנים ---
     const playersContainer = document.getElementById('players-list-container');
     const btnAddPlayer = document.getElementById('btn-add-player');
 
@@ -140,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen(setupScreen, lineupScreen);
     });
 
-    // --- מערכת שיבוץ מתקדמת: החלפות והחזרה לספסל ---
+    // --- מערכת שיבוץ מתקדמת ---
     let selectedPlayerCard = null;
 
     function initLineupBuilder() {
@@ -160,36 +165,29 @@ document.addEventListener('DOMContentLoaded', () => {
             card.id = player.id;
             card.innerHTML = `<div class="player-number">${player.number}</div><div class="player-name">${player.name}</div>`;
             
-            // לחיצה על שחקן (בחירה, הסרת בחירה או החלפה)
             card.addEventListener('click', function(e) {
                 e.stopPropagation();
                 
                 if (selectedPlayerCard) {
                     if (selectedPlayerCard === this) {
-                        // ביטול בחירה
                         selectedPlayerCard.classList.remove('selected');
                         selectedPlayerCard = null;
                     } else {
-                        // החלפה (Swap) בין השחקן הנבחר לשחקן שנלחץ עכשיו
                         const parentA = selectedPlayerCard.parentNode;
                         const parentB = this.parentNode;
                         
                         if (parentA === parentB && parentA === benchPlayersList) {
-                            // אם שניהם בספסל - פשוט בחר את החדש
                             selectedPlayerCard.classList.remove('selected');
                             selectedPlayerCard = this;
                             this.classList.add('selected');
                         } else {
-                            // ביצוע ההחלפה בפועל
                             parentB.appendChild(selectedPlayerCard);
                             parentA.appendChild(this);
-                            
                             selectedPlayerCard.classList.remove('selected');
                             selectedPlayerCard = null;
                         }
                     }
                 } else {
-                    // בחירת השחקן
                     selectedPlayerCard = this;
                     this.classList.add('selected');
                 }
@@ -217,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     zone.addEventListener('click', function(e) {
                         e.stopPropagation();
                         
-                        // אם לחצו על עמדה ואין שחקן נבחר, נבדוק אם יש פה שחקן שאפשר לבחור
                         if(!selectedPlayerCard) {
                             if(this.children.length > 0) {
                                 selectedPlayerCard = this.children[0];
@@ -226,13 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
 
-                        // אם העמדה תפוסה, נחליף ביניהם
                         if(this.children.length > 0) {
                             const existingPlayer = this.children[0];
                             selectedPlayerCard.parentNode.appendChild(existingPlayer);
                         }
                         
-                        // הצבת השחקן הנבחר
                         this.appendChild(selectedPlayerCard);
                         selectedPlayerCard.classList.remove('selected');
                         selectedPlayerCard = null;
@@ -245,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pitchesContainer.appendChild(pitch);
         }
 
-        // לחיצה על אזור הספסל מחזירה את השחקן לספסל
         benchArea.addEventListener('click', function(e) {
             if(selectedPlayerCard) {
                 benchPlayersList.appendChild(selectedPlayerCard);
@@ -254,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // לחיצה מחוץ לכל אזור תבטל את הבחירה
         document.body.addEventListener('click', () => {
             if(selectedPlayerCard) {
                 selectedPlayerCard.classList.remove('selected');
@@ -262,6 +255,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ניקוי הרכב - החזרת כל השחקנים לספסל
+    document.getElementById('btn-clear-lineup').addEventListener('click', () => {
+        const bench = document.getElementById('bench-players');
+        const playersOnPitch = document.querySelectorAll('.drop-zone .player-card');
+        
+        if (playersOnPitch.length === 0) return;
+        
+        if (confirm('האם אתה בטוח שברצונך לנקות את כל ההרכב?')) {
+            playersOnPitch.forEach(player => bench.appendChild(player));
+        }
+    });
 
     document.querySelectorAll('.save-lineup').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -294,4 +299,41 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    // --- מעבר למסך המשחק החי ---
+    document.getElementById('btn-start-match').addEventListener('click', () => {
+        // העברת המגרשים והספסל כפי שהם אל תוך מסך הלייב
+        const livePitchesContainer = document.getElementById('live-pitches-container');
+        const liveBenchContainer = document.getElementById('live-bench-players');
+        
+        const currentPitches = document.getElementById('pitches-container');
+        const currentBench = document.getElementById('bench-players');
+
+        // העברת הילדים (Nodes) שומרת על אירועי הלחיצה וההחלפות!
+        while(currentPitches.firstChild) {
+            livePitchesContainer.appendChild(currentPitches.firstChild);
+        }
+        while(currentBench.firstChild) {
+            liveBenchContainer.appendChild(currentBench.firstChild);
+        }
+
+        // טעינה ראשונית של טבלת הסטטיסטיקות מהזיכרון
+        const players = JSON.parse(localStorage.getItem('tacticalPlayers')) || [];
+        const statsBody = document.getElementById('stats-table-body');
+        statsBody.innerHTML = '';
+        players.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${p.number}</td>
+                <td>${p.name}</td>
+                <td>0</td>
+                <td>0%</td>
+                <td>0</td>
+            `;
+            statsBody.appendChild(tr);
+        });
+
+        switchScreen(lineupScreen, liveMatchScreen);
+    });
+
 });
