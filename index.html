@@ -3,311 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Touchline Management System</title>
-    <style>
-        :root {
-            --pitch-green: #2ecc71;
-            --pitch-lines: rgba(255,255,255,0.8);
-            --dark-blue: #2c3e50;
-            --accent-gold: #f1c40f;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f3f5;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- לוגו וכותרת --- */
-        header {
-            background: var(--dark-blue);
-            padding: 15px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .logo {
-            font-size: 3rem;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        .ball-o {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            margin: 0 5px;
-            position: relative;
-            display: inline-block;
-            border: 2px solid #000;
-            background-image: 
-                radial-gradient(circle at 50% 50%, #fff 20%, #000 21%, #000 25%, transparent 26%),
-                radial-gradient(circle at 10% 30%, #000 15%, transparent 16%),
-                radial-gradient(circle at 90% 30%, #000 15%, transparent 16%),
-                radial-gradient(circle at 50% 90%, #000 15%, transparent 16%);
-            animation: bounce 1s infinite alternate cubic-bezier(.5,0,.5,1);
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-15px); }
-        }
-
-        .by-line {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: -5px;
-        }
-
-        /* --- ניהול תצוגות --- */
-        .view { display: none; padding: 20px; flex: 1; overflow-y: auto; }
-        .view.active { display: flex; flex-direction: column; }
-
-        /* --- עמוד בית --- */
-        .setup-card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            margin: 40px auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            background: var(--pitch-green);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        /* --- לוח טקטי --- */
-        .tactical-container { display: flex; gap: 20px; height: 100%; }
-        .bench {
-            width: 200px;
-            background: #dfe6e9;
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .pitch {
-            flex: 1;
-            background-color: var(--pitch-green);
-            border: 4px solid var(--white);
-            border-radius: 15px;
-            position: relative;
-            background-image: 
-                linear-gradient(var(--pitch-lines) 2px, transparent 2px),
-                linear-gradient(90deg, var(--pitch-lines) 2px, transparent 2px);
-            background-size: 50% 50%;
-            display: grid;
-            grid-template-rows: repeat(4, 1fr);
-            padding: 20px;
-        }
-
-        .player-slot {
-            width: 60px;
-            height: 60px;
-            border: 2px dashed rgba(255,255,255,0.5);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: auto;
-        }
-
-        .player-token {
-            width: 55px;
-            height: 55px;
-            background: var(--accent-gold);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            border: 2px solid #333;
-        }
-
-        .player-token.selected { border: 4px solid #fff; transform: scale(1.1); }
-
-        /* --- לוח משחק --- */
-        .scoreboard {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: var(--dark-blue);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
-        .score-box { font-size: 4rem; font-weight: bold; }
-        .game-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .action-btn {
-            padding: 20px;
-            font-size: 1.2rem;
-            border-radius: 15px;
-            border: none;
-            font-weight: bold;
-            color: white;
-        }
-    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TacticalBoard - ניהול משחק</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- רקע דינמי -->
+    <div class="background-gradient"></div>
 
-<header>
-    <div class="logo">T<span class="ball-o"></span>uchline</div>
-    <div class="by-line">By Idan Biton</div>
-</header>
+    <div class="app-container">
+        <!-- אזור עליון - שעון ותאריך -->
+        <header class="top-bar glass-panel">
+            <div id="live-time" class="time-display">00:00:00</div>
+            <div id="live-date" class="date-display">טוען תאריך...</div>
+        </header>
 
-<!-- עמוד 1: הגדרות -->
-<div id="view-home" class="view active">
-    <div class="setup-card">
-        <h2>הגדרות משחק חדש</h2>
-        <input type="text" id="teamA-name" placeholder="שם קבוצה א' (למשל: רובי שפירא)" value="רובי שפירא">
-        <input type="text" id="teamB-name" placeholder="שם קבוצה ב'" value="אורחים">
-        <input type="number" id="game-duration" placeholder="זמן משחק (דקות)" value="20">
-        <button class="btn" onclick="showView('view-tactical')">המשך לבחירת הרכב</button>
-    </div>
-</div>
-
-<!-- עמוד 2: לוח טקטי -->
-<div id="view-tactical" class="view">
-    <div class="tactical-container">
-        <div class="bench" id="bench-list">
-            <h3>ספסל</h3>
-            <!-- שחקנים יוזרקו כאן -->
-        </div>
-        <div class="pitch">
-            <div class="zone-row" style="display: flex; justify-content: space-around;">
-                <div class="player-slot" onclick="placePlayer(this)"></div>
+        <!-- מסך הבית -->
+        <main id="home-screen" class="screen active">
+            <div class="hero-section glass-panel">
+                <div class="logo-container">
+                    <h1 class="system-title">TacticalBoard</h1>
+                    <div class="bouncing-ball">⚽️</div>
+                </div>
+                <p class="subtitle">מערכת ניהול משחק בזמן אמת</p>
+                <button id="btn-new-match" class="ios-button primary-action">ניהול משחק חדש</button>
+                <div class="system-info">
+                    <span>גרסה 1.0</span> | <span>עודכן לאחרונה: מאי 2026</span>
+                </div>
             </div>
-            <div class="zone-row" style="display: flex; justify-content: space-around;">
-                <div class="player-slot" onclick="placePlayer(this)"></div>
-                <div class="player-slot" onclick="placePlayer(this)"></div>
+        </main>
+
+        <!-- מסך הגדרות משחק (מוסתר כברירת מחדל) -->
+        <main id="setup-screen" class="screen">
+            <div class="setup-container glass-panel">
+                <h2>הגדרות משחק חדש</h2>
+                <!-- הטופס ייבנה בהמשך -->
+                <button id="btn-back-home" class="ios-button secondary-action">חזרה</button>
             </div>
-            <div class="zone-row" style="display: flex; justify-content: space-around;">
-                <div class="player-slot" onclick="placePlayer(this)"></div>
-                <div class="player-slot" onclick="placePlayer(this)"></div>
-            </div>
-            <div class="zone-row" style="display: flex; justify-content: space-around;">
-                <div class="player-slot" onclick="placePlayer(this)"></div>
-            </div>
-            <button class="btn" onclick="showView('view-game')">התחל משחק!</button>
-        </div>
+        </main>
     </div>
-</div>
 
-<!-- עמוד 3: לוח משחק פעיל -->
-<div id="view-game" class="view">
-    <div class="scoreboard">
-        <div id="display-teamA">קבוצה א</div>
-        <div class="score-box" id="score-text">0 - 0</div>
-        <div id="display-teamB">קבוצה ב</div>
-    </div>
-    <div style="text-align:center; font-size: 2rem; margin-bottom: 20px;" id="game-timer">20:00</div>
-    
-    <div class="game-actions">
-        <button class="action-btn" style="background:#e74c3c" onclick="updateScore('A')">⚽ גול לקבוצה א'</button>
-        <button class="action-btn" style="background:#3498db" onclick="updateScore('B')">⚽ גול לקבוצה ב'</button>
-        <button class="action-btn" style="background:#f1c40f; color: black;" onclick="logEvent('כרטיס צהוב')">🟨 צהוב</button>
-        <button class="action-btn" style="background:#c0392b" onclick="logEvent('כרטיס אדום')">🟥 אדום</button>
-    </div>
-</div>
-
-<script>
-    let selectedPlayer = null;
-    let scoreA = 0;
-    let scoreB = 0;
-
-    const players = [
-        {name: 'אורי', num: 1}, {name: 'נועם', num: 4}, {name: 'איתי', num: 5},
-        {name: 'דוד', num: 8}, {name: 'יהונתן', num: 10}, {name: 'לביא', num: 7},
-        {name: 'אריאל', num: 9}
-    ];
-
-    function showView(viewId) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        
-        if(viewId === 'view-game') {
-            document.getElementById('display-teamA').innerText = document.getElementById('teamA-name').value;
-            document.getElementById('display-teamB').innerText = document.getElementById('teamB-name').value;
-        }
-    }
-
-    // יצירת שחקנים בספסל
-    const bench = document.getElementById('bench-list');
-    players.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'player-token';
-        div.innerHTML = `<span>${p.num}</span><span>${p.name}</span>`;
-        div.onclick = () => {
-            document.querySelectorAll('.player-token').forEach(t => t.classList.remove('selected'));
-            div.classList.add('selected');
-            selectedPlayer = div;
-        };
-        bench.appendChild(div);
-    });
-
-    function placePlayer(slot) {
-        if(selectedPlayer && slot.children.length === 0) {
-            const clone = selectedPlayer.cloneNode(true);
-            clone.classList.remove('selected');
-            slot.appendChild(clone);
-            selectedPlayer.style.opacity = "0.4";
-            selectedPlayer.onclick = null;
-            selectedPlayer = null;
-        }
-    }
-
-    function updateScore(team) {
-        if(team === 'A') scoreA++; else scoreB++;
-        document.getElementById('score-text').innerText = `${scoreA} - ${scoreB}`;
-    }
-
-    function logEvent(type) {
-        alert("אירוע נרשם: " + type);
-    }
-</script>
-
+    <script src="app.js"></script>
 </body>
 </html>
