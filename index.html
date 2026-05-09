@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TacticalBoard - ניהול משחק</title>
+    <title>Touchline - ניהול משחק</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,21 +22,27 @@
         <main id="home-screen" class="screen active">
             <div class="hero-section glass-panel">
                 <div class="logo-container">
-                    <h1 class="system-title">TacticalBoard</h1>
-                    <div class="bouncing-ball">⚽️</div>
+                    <h1 class="system-title">T<span class="bouncing-ball" style="display: inline-block;">⚽️</span>uchline</h1>
                 </div>
                 <p class="subtitle">מערכת ניהול משחק בזמן אמת</p>
-                <button id="btn-new-match" class="ios-button primary-action">ניהול משחק חדש</button>
+                <button id="btn-new-match" class="ios-button primary-action">התחלת משחק חדש</button>
+                
+                <!-- חלון צף לחזרה למשחק פעיל -->
+                <button id="btn-resume-match" class="ios-button active-match-widget hidden">
+                    <div class="pulse-indicator"></div>
+                    <span>חזור למשחק הפעיל</span>
+                </button>
+
                 <div class="system-info">
-                    <span>גרסה 1.0</span> | <span>עודכן לאחרונה: מאי 2026</span>
+                    <span>גרסה 1.1</span> | <span>&copy; 2026 by Idan Biton</span>
                 </div>
             </div>
         </main>
 
-        <!-- 2. מסך הגדרות משחק -->
+        <!-- 2. מסך הגדרות משחק ושחקנים -->
         <main id="setup-screen" class="screen">
             <div class="setup-container glass-panel">
-                <h2>הגדרות משחק חדש</h2>
+                <h2>הגדרות וסגל שחקנים</h2>
                 <form id="setup-form" class="setup-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -44,41 +50,34 @@
                             <input type="text" id="opponent-name" required placeholder="לדוגמה: מכבי חיפה">
                         </div>
                         <div class="form-group">
-                            <label>מיקום</label>
-                            <select id="match-location">
-                                <option value="home">בית (מ.ס רובי שפירא)</option>
-                                <option value="away">חוץ</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>שיטת משחק</label>
-                            <select id="match-format">
-                                <option value="2-7v7">2 מגרשים (7 נגד 7)</option>
-                                <option value="1-9v9">מגרש אחד (9 נגד 9)</option>
-                                <option value="1-11v11">מגרש אחד (11 נגד 11)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label>משך משחק (דקות)</label>
                             <select id="match-duration">
-                                <option value="70" selected>70 דקות (35 כל מחצית)</option>
-                                <option value="60">60 דקות (30 כל מחצית)</option>
-                                <option value="90">90 דקות (45 כל מחצית)</option>
+                                <option value="70" selected>70 דקות</option>
+                                <option value="60">60 דקות</option>
+                                <option value="90">90 דקות</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="form-group full-width">
-                        <label>רשימת שחקנים (שם, מספר)</label>
-                        <textarea id="players-list" rows="4" placeholder="הדבק כאן רשימה. לדוגמה:&#10;יוסי לוי, 10&#10;דני כהן, 7" required></textarea>
+                    <div class="players-setup-section">
+                        <div class="players-header">
+                            <label>סגל הקבוצה (שם ומספר)</label>
+                            <div class="players-actions">
+                                <button type="button" id="btn-load-csv" class="ios-button-small">טען מאקסל</button>
+                                <input type="file" id="file-csv" accept=".csv" style="display:none;">
+                                <button type="button" id="btn-load-default" class="ios-button-small">טען סגל שמור</button>
+                            </div>
+                        </div>
+                        
+                        <div id="players-list-container" class="players-list-container">
+                            <!-- שורות שחקנים יתווספו כאן דינמית -->
+                        </div>
+                        <button type="button" id="btn-add-player" class="ios-button-small add-btn">+ הוסף שחקן</button>
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" id="btn-back-home" class="ios-button secondary-action">ביטול וחזרה</button>
-                        <button type="submit" class="ios-button primary-action">המשך לשיבוץ הרכב</button>
+                        <button type="button" id="btn-back-home" class="ios-button secondary-action">חזרה לראשי</button>
+                        <button type="submit" class="ios-button primary-action">שמור והמשך להרכב</button>
                     </div>
                 </form>
             </div>
@@ -88,20 +87,34 @@
         <main id="lineup-screen" class="screen">
             <div class="lineup-container">
                 <div class="lineup-header glass-panel">
-                    <h2>תכנון הרכב פותח</h2>
-                    <button id="btn-start-match" class="ios-button primary-action">התחל משחק ⚽️</button>
+                    <button type="button" id="btn-back-setup" class="ios-button-small secondary-action">חזור להגדרות</button>
+                    <h2>תכנון הרכב (בחר שחקן -> בחר עמדה)</h2>
+                    <button id="btn-start-match" class="ios-button primary-action">התחל משחק</button>
+                </div>
+
+                <!-- תפריט שמירת הרכבים -->
+                <div class="lineup-saves glass-panel">
+                    <span>הרכבים שמורים:</span>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור 1</button>
+                    <button type="button" class="ios-button-small load-lineup" data-slot="1">טען 1</button>
+                    <span class="divider">|</span>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="2">שמור 2</button>
+                    <button type="button" class="ios-button-small load-lineup" data-slot="2">טען 2</button>
+                    <span class="divider">|</span>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="3">שמור 3</button>
+                    <button type="button" class="ios-button-small load-lineup" data-slot="3">טען 3</button>
                 </div>
                 
                 <div class="tactical-area">
-                    <div class="bench-area glass-panel">
-                        <h3>ספסל שחקנים</h3>
-                        <div id="bench-players" class="bench-players-list">
-                            <!-- שחקנים יופיעו כאן -->
-                        </div>
-                    </div>
-
                     <div id="pitches-container" class="pitches-wrapper">
-                        <!-- המגרשים יופיעו כאן -->
+                        <!-- המגרשים (חצאי מגרש) יופיעו כאן -->
+                    </div>
+                </div>
+
+                <div class="bench-area glass-panel">
+                    <h3>ספסל מחליפים</h3>
+                    <div id="bench-players" class="bench-players-list">
+                        <!-- שחקנים יופיעו כאן -->
                     </div>
                 </div>
             </div>
