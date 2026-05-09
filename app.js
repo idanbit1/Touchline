@@ -1,23 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- ניהול מסך מלא (Fullscreen) ---
+    // --- מסך מלא ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
     btnFullscreen.addEventListener('click', () => {
         const doc = document.documentElement;
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            // כניסה למסך מלא (תמיכה גם באפל)
             if (doc.requestFullscreen) doc.requestFullscreen();
             else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
             btnFullscreen.textContent = 'יציאה ממסך מלא ↙️';
         } else {
-            // יציאה ממסך מלא
             if (document.exitFullscreen) document.exitFullscreen();
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             btnFullscreen.textContent = 'מסך מלא 🔲';
         }
     });
 
-    // --- ניהול שעון המערכת ---
+    // --- שעון ---
     function updateClock() {
         const now = new Date();
         const timeDisplay = document.getElementById('live-time');
@@ -43,18 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => showScreen.classList.add('active'), 50);
     }
 
-    // ניווט
     document.getElementById('btn-new-match').addEventListener('click', () => switchScreen(homeScreen, setupScreen));
     document.getElementById('btn-back-home').addEventListener('click', () => switchScreen(setupScreen, homeScreen));
     document.getElementById('btn-back-setup').addEventListener('click', () => switchScreen(lineupScreen, setupScreen));
-    document.getElementById('btn-back-home-lineup').addEventListener('click', () => switchScreen(lineupScreen, homeScreen)); // הלחצן החדש
+    document.getElementById('btn-back-home-lineup').addEventListener('click', () => switchScreen(lineupScreen, homeScreen));
     
     activeMatchWidget.addEventListener('click', () => {
         initLineupBuilder();
         switchScreen(homeScreen, lineupScreen);
     });
 
-    // --- טופס הגדרות וניהול שחקנים ---
+    // --- טופס הגדרות וניהול שחקנים (כולל טעינת אקסל) ---
     const playersContainer = document.getElementById('players-list-container');
     const btnAddPlayer = document.getElementById('btn-add-player');
     const btnLoadDefault = document.getElementById('btn-load-default');
@@ -63,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = document.createElement('div');
         row.className = 'player-input-row';
         row.innerHTML = `
-            <input type="text" class="p-name" placeholder="שם השחקן" value="${name}" required>
+            <input type="text" class="p-name" placeholder="שם שחקן מלא" value="${name}" required>
             <input type="number" class="p-number" placeholder="מספר" value="${number}" required>
             <button type="button" class="btn-remove-player" title="הסר שחקן">X</button>
         `;
@@ -74,24 +71,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if(playersContainer.children.length === 0) {
         createPlayerRow(); createPlayerRow(); createPlayerRow();
     }
-
     btnAddPlayer.addEventListener('click', () => createPlayerRow());
 
-    // טעינת מ-CSV
-    document.getElementById('btn-load-csv').addEventListener('click', () => document.getElementById('file-csv').click());
-    document.getElementById('file-csv').addEventListener('change', (e) => {
+    // טעינת שחקנים מאקסל (XLSX / CSV) בעזרת SheetJS
+    document.getElementById('btn-load-excel').addEventListener('click', () => document.getElementById('file-excel').click());
+    document.getElementById('file-excel').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if(!file) return;
+
         const reader = new FileReader();
         reader.onload = (event) => {
-            const text = event.target.result;
-            playersContainer.innerHTML = '';
-            text.split('\n').forEach(line => {
-                const parts = line.split(',');
-                if(parts.length >= 2) createPlayerRow(parts[0].trim(), parts[1].trim());
-            });
+            try {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                // המרת הגיליון למערך של מערכים
+                const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+
+                playersContainer.innerHTML = '';
+                
+                // עובר על השורות, מדלג על כותרת אם יש טקסט בעמודת המספר
+                let startIdx = 0;
+                if(rows.length > 0 && isNaN(parseInt(rows[0][1]))) {
+                    startIdx = 1;
+                }
+
+                for(let i = startIdx; i < rows.length; i++) {
+                    const row = rows[i];
+                    if(row && row.length >= 2) {
+                        const name = row[0] ? row[0].toString().trim() : '';
+                        const number = row[1] ? row[1].toString().trim() : '';
+                        if(name) createPlayerRow(name, number);
+                    }
+                }
+            } catch (err) {
+                alert('שגיאה בקריאת הקובץ. ודא שזהו קובץ אקסל תקין עם שם בעמודה הראשונה ומספר בשנייה.');
+                console.error(err);
+            }
         };
-        reader.readAsText(file);
+        // קריאה כ-ArrayBuffer מתאימה לספריית SheetJS
+        reader.readAsArrayBuffer(file);
+        e.target.value = ''; // איפוס הקלט לאפשר העלאה חוזרת
     });
 
     // טעינת סגל שמור
@@ -131,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen(setupScreen, lineupScreen);
     });
 
-    // --- מערכת ההרכב: לחיצה ובחירה ---
+    // --- בניית המגרש ושיבוץ (Tap to Select) ---
     let selectedPlayerCard = null;
 
     function initLineupBuilder() {
