@@ -1,5 +1,5 @@
 :root {
-    --ios-blue: #0A84FF; --ios-blue-active: #006ee6; --ios-green: #30d158;
+    --ios-blue: #0A84FF; --ios-blue-active: #006ee6; --ios-green: #30d158; --ios-red: #ff453a;
     --ios-bg-light: rgba(255, 255, 255, 0.15); --ios-border: rgba(255, 255, 255, 0.2);
     --text-primary: #ffffff; --text-secondary: rgba(235, 235, 245, 0.6);
 }
@@ -56,17 +56,16 @@ body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; 
 .btn-remove-player { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.5); padding: 0 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; }
 .form-actions { display: flex; justify-content: space-between; margin-top: 20px; }
 
-/* Lineup Screen Layout - מסודר כך שימנע חיתוך ויאפשר גלילה במגרש */
+/* Lineup Screen Layout */
 .lineup-container { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
 .lineup-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; flex-shrink: 0; }
 .lineup-saves { display: flex; justify-content: center; align-items: center; padding: 8px; gap: 15px; font-size: 14px; flex-shrink: 0; }
 .divider { color: var(--text-secondary); }
 
-/* האזור הטקטי גמיש ויכול להיגלל (Scroll) אם המסך ממש קטן באייפד לרוחב */
 .tactical-area { flex: 1; display: flex; justify-content: center; overflow-y: auto; padding: 5px 0; min-height: 0; }
 .pitches-wrapper { display: flex; gap: 20px; width: 100%; height: 100%; justify-content: center; align-items: stretch; }
 
-/* חצי מגרש - התאמתי את הגובה והריווח שיכנס גם לרוחב */
+/* חצי מגרש */
 .pitch-half {
     flex: 1; max-width: 480px; min-height: 380px; 
     background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%);
@@ -80,7 +79,6 @@ body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; 
 
 .pitch-row { display: flex; justify-content: space-evenly; width: 100%; z-index: 1; }
 
-/* קוביות טקטיות במגרש - הוקטנו מעט כדי שלא יחתכו לגובה */
 .drop-zone {
     width: 90px; height: 60px;
     border: 2px dashed rgba(255,255,255,0.6); border-radius: 10px;
@@ -104,7 +102,6 @@ body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; 
 .player-number { background: white; color: var(--ios-blue); font-weight: bold; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 13px; flex-shrink: 0; }
 .player-name { font-size: 15px; font-weight: 600; white-space: nowrap; }
 
-/* עיצוב שחקן בעמדה הטקטית במגרש */
 .drop-zone .player-card { 
     width: 100%; height: 100%; padding: 2px; border-radius: 8px; flex-direction: column; 
     justify-content: space-evenly; gap: 0; box-shadow: 0 3px 8px rgba(0,0,0,0.6); 
@@ -112,5 +109,30 @@ body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; 
 }
 .drop-zone .player-card .player-number { width: 22px; height: 22px; font-size: 12px; border: 2px solid white; margin: 0 auto; }
 .drop-zone .player-card .player-name { font-size: 12px; font-weight: bold; width: 100%; text-align: center; white-space: normal; line-height: 1.1; overflow: hidden; }
+
+/* =========================================
+   Live Match Screen Styles
+   ========================================= */
+.live-container { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 15px; }
+.live-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; flex-shrink: 0; }
+
+.score-board { display: flex; gap: 20px; align-items: center; }
+.score-box { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.score-box span { font-size: 14px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+.score-numbers { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; background: rgba(0,0,0,0.4); padding: 5px 20px; border-radius: 12px; border: 1px solid var(--ios-border); }
+.main-score .highlight-score { font-size: 42px; background: rgba(48, 209, 88, 0.2); border-color: var(--ios-green); color: var(--ios-green); }
+
+.match-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.stopwatch { font-size: 56px; font-weight: bold; font-variant-numeric: tabular-nums; letter-spacing: 2px; line-height: 1; }
+
+.live-body { flex: 1; display: flex; gap: 20px; overflow: hidden; }
+.live-pitches-area { flex: 2; display: flex; flex-direction: column; }
+.live-stats-area { flex: 1; display: flex; flex-direction: column; padding: 15px; max-width: 400px; }
+
+.live-stats-area h3 { text-align: center; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--ios-border); padding-bottom: 10px; }
+.table-responsive { overflow-y: auto; flex: 1; }
+.stats-table { width: 100%; border-collapse: collapse; text-align: center; }
+.stats-table th { padding: 10px; color: var(--text-secondary); font-size: 14px; border-bottom: 1px solid var(--ios-border); position: sticky; top: 0; background: rgba(30,30,30,0.9); }
+.stats-table td { padding: 12px 5px; font-size: 16px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
