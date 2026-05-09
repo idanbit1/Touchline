@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- רקע דינמי -->
     <div class="background-gradient"></div>
 
     <div class="app-container">
@@ -19,7 +18,7 @@
             <div id="live-date" class="date-display">טוען תאריך...</div>
         </header>
 
-        <!-- מסך הבית -->
+        <!-- 1. מסך הבית -->
         <main id="home-screen" class="screen active">
             <div class="hero-section glass-panel">
                 <div class="logo-container">
@@ -34,8 +33,7 @@
             </div>
         </main>
 
-        <!-- מסך הגדרות משחק (מוסתר כברירת מחדל) -->
-           <!-- מסך הגדרות משחק -->
+        <!-- 2. מסך הגדרות משחק -->
         <main id="setup-screen" class="screen">
             <div class="setup-container glass-panel">
                 <h2>הגדרות משחק חדש</h2>
@@ -76,18 +74,17 @@
                     <div class="form-group full-width">
                         <label>רשימת שחקנים (שם, מספר)</label>
                         <textarea id="players-list" rows="4" placeholder="הדבק כאן רשימה. לדוגמה:&#10;יוסי לוי, 10&#10;דני כהן, 7" required></textarea>
-                        <small>הזן כל שחקן בשורה נפרדת. ניתן להעתיק ולהדביק מאקסל.</small>
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" id="btn-back-home" class="ios-button secondary-action">ביטול</button>
+                        <button type="button" id="btn-back-home" class="ios-button secondary-action">ביטול וחזרה</button>
                         <button type="submit" class="ios-button primary-action">המשך לשיבוץ הרכב</button>
                     </div>
                 </form>
             </div>
         </main>
-        
-        <!-- מסך תכנון הרכב (הכנה לשלב הבא) -->        <!-- מסך תכנון הרכב -->
+
+        <!-- 3. מסך תכנון הרכב -->
         <main id="lineup-screen" class="screen">
             <div class="lineup-container">
                 <div class="lineup-header glass-panel">
@@ -96,21 +93,21 @@
                 </div>
                 
                 <div class="tactical-area">
-                    <!-- ספסל מחליפים (יוצג בצד ימין) -->
                     <div class="bench-area glass-panel">
                         <h3>ספסל שחקנים</h3>
                         <div id="bench-players" class="bench-players-list">
-                            <!-- שחקנים ייטענו לכאן דינמית -->
+                            <!-- שחקנים יופיעו כאן -->
                         </div>
                     </div>
 
-                    <!-- אזור המגרשים שייווצר דינמית -->
                     <div id="pitches-container" class="pitches-wrapper">
-                        <!-- המגרשים ירונדרו דרך JS -->
+                        <!-- המגרשים יופיעו כאן -->
                     </div>
                 </div>
             </div>
         </main>
+    </div>
 
+    <script src="app.js"></script>
 </body>
 </html>
