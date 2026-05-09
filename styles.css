@@ -1,11 +1,7 @@
 :root {
-    --ios-blue: #0A84FF;
-    --ios-blue-active: #006ee6;
-    --ios-green: #30d158;
-    --ios-bg-light: rgba(255, 255, 255, 0.15);
-    --ios-border: rgba(255, 255, 255, 0.2);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(235, 235, 245, 0.6);
+    --ios-blue: #0A84FF; --ios-blue-active: #006ee6; --ios-green: #30d158;
+    --ios-bg-light: rgba(255, 255, 255, 0.15); --ios-border: rgba(255, 255, 255, 0.2);
+    --text-primary: #ffffff; --text-secondary: rgba(235, 235, 245, 0.6);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -18,111 +14,103 @@ body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; 
 
 .glass-panel { background: var(--ios-bg-light); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--ios-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
 
-.top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; margin-bottom: 10px; flex-shrink: 0; }
-.time-display { font-size: 22px; font-weight: bold; }
-.date-display { font-size: 16px; color: var(--text-secondary); }
+.top-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; margin-bottom: 8px; flex-shrink: 0; }
+.time-display { font-size: 20px; font-weight: bold; }
+.date-display { font-size: 15px; color: var(--text-secondary); }
 
 .screen { display: none; flex: 1; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
 .screen.active { display: flex; }
 
-/* Home Screen */
-.hero-section { text-align: center; padding: 50px 80px; display: flex; flex-direction: column; align-items: center; gap: 20px; margin: auto; }
-.system-title { font-size: 72px; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px; }
-.bouncing-ball { font-size: 60px; animation: bounce 1.5s infinite ease-in-out; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-.subtitle { font-size: 24px; color: var(--text-secondary); margin-bottom: 30px; }
-.system-info { margin-top: 40px; font-size: 15px; color: var(--text-secondary); }
+.hero-section { text-align: center; padding: 40px 60px; display: flex; flex-direction: column; align-items: center; gap: 20px; margin: auto; }
+.system-title { font-size: 64px; font-weight: 800; margin-bottom: 5px; }
+.bouncing-ball { font-size: 50px; animation: bounce 1.5s infinite ease-in-out; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+.subtitle { font-size: 20px; color: var(--text-secondary); margin-bottom: 20px; }
 
-/* Buttons */
-.ios-button { font-size: 18px; font-weight: 600; padding: 16px 32px; border-radius: 16px; border: none; cursor: pointer; transition: 0.2s; }
+.ios-button { font-size: 18px; font-weight: 600; padding: 14px 28px; border-radius: 16px; border: none; cursor: pointer; transition: 0.2s; }
 .ios-button:active { transform: scale(0.96); }
 .primary-action { background-color: var(--ios-blue); color: white; }
 .secondary-action { background-color: transparent; color: white; border: 1px solid var(--ios-border); }
-.ios-button-small { background: rgba(255,255,255,0.15); border: 1px solid var(--ios-border); color: white; padding: 10px 18px; border-radius: 12px; font-size: 15px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+.ios-button-small { background: rgba(255,255,255,0.15); border: 1px solid var(--ios-border); color: white; padding: 8px 16px; border-radius: 12px; font-size: 14px; cursor: pointer; transition: 0.2s; font-weight: 500; }
 .ios-button-small:active { background: rgba(255,255,255,0.3); }
 .ios-button-small.add-btn { background: rgba(48, 209, 88, 0.2); border-color: var(--ios-green); margin-top: 10px; width: 100%; font-weight: bold; }
 
-/* Active Match Widget */
-.active-match-widget { margin-top: 20px; background: rgba(48, 209, 88, 0.2); border: 1px solid var(--ios-green); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.active-match-widget { margin-top: 15px; background: rgba(48, 209, 88, 0.2); border: 1px solid var(--ios-green); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .active-match-widget.hidden { display: none; }
-.pulse-indicator { width: 16px; height: 16px; background-color: var(--ios-green); border-radius: 50%; animation: pulse 1.5s infinite; }
+.pulse-indicator { width: 14px; height: 14px; background-color: var(--ios-green); border-radius: 50%; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(48, 209, 88, 0); } 100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); } }
 
 /* Setup Form */
-.setup-container { width: 100%; max-width: 700px; padding: 30px; overflow-y: auto; margin: auto; }
-.setup-container h2 { text-align: center; margin-bottom: 25px; }
-.form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+.setup-container { width: 100%; max-width: 650px; padding: 25px; overflow-y: auto; margin: auto; }
+.setup-container h2 { text-align: center; margin-bottom: 20px; }
+.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
 .form-group { flex: 1; display: flex; flex-direction: column; text-align: right; }
-.form-group label, .players-header label { font-size: 15px; color: var(--text-secondary); margin-bottom: 8px; }
-.form-group input, .form-group select, .player-input-row input { padding: 14px; border-radius: 12px; border: 1px solid var(--ios-border); background: rgba(0,0,0,0.3); color: white; font-size: 16px; }
-.players-setup-section { margin-top: 15px; border-top: 1px solid var(--ios-border); padding-top: 20px; }
-.players-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.players-list-container { display: flex; flex-direction: column; gap: 12px; max-height: 30vh; overflow-y: auto; padding-right: 5px; }
-.player-input-row { display: flex; gap: 12px; }
+.form-group label { font-size: 14px; color: var(--text-secondary); margin-bottom: 5px; }
+.form-group input, .form-group select, .player-input-row input { padding: 12px; border-radius: 10px; border: 1px solid var(--ios-border); background: rgba(0,0,0,0.3); color: white; font-size: 16px; }
+.players-setup-section { margin-top: 10px; border-top: 1px solid var(--ios-border); padding-top: 15px; }
+.players-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.players-list-container { display: flex; flex-direction: column; gap: 10px; max-height: 25vh; overflow-y: auto; padding-right: 5px; }
+.player-input-row { display: flex; gap: 10px; }
 .player-input-row input[type="text"] { flex: 2; }
-.player-input-row input[type="number"] { flex: 1; text-align: center; font-weight: bold; font-size: 18px; }
-.btn-remove-player { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.5); padding: 0 20px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 20px; }
-.form-actions { display: flex; justify-content: space-between; margin-top: 30px; }
+.player-input-row input[type="number"] { flex: 1; text-align: center; font-weight: bold; font-size: 16px; }
+.btn-remove-player { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.5); padding: 0 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; }
+.form-actions { display: flex; justify-content: space-between; margin-top: 20px; }
 
-/* Lineup Screen Layout (Flexbox לטיפול במסך מלא) */
+/* Lineup Screen Layout - מסודר כך שימנע חיתוך ויאפשר גלילה במגרש */
 .lineup-container { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
-.lineup-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; flex-shrink: 0; }
-.lineup-saves { display: flex; justify-content: center; align-items: center; padding: 10px; gap: 15px; font-size: 15px; flex-shrink: 0; }
+.lineup-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; flex-shrink: 0; }
+.lineup-saves { display: flex; justify-content: center; align-items: center; padding: 8px; gap: 15px; font-size: 14px; flex-shrink: 0; }
 .divider { color: var(--text-secondary); }
 
-.tactical-area { flex: 1; display: flex; justify-content: center; overflow: hidden; padding: 5px 0; min-height: 0; }
-.pitches-wrapper { display: flex; gap: 40px; width: 100%; height: 100%; justify-content: center; align-items: stretch; }
+/* האזור הטקטי גמיש ויכול להיגלל (Scroll) אם המסך ממש קטן באייפד לרוחב */
+.tactical-area { flex: 1; display: flex; justify-content: center; overflow-y: auto; padding: 5px 0; min-height: 0; }
+.pitches-wrapper { display: flex; gap: 20px; width: 100%; height: 100%; justify-content: center; align-items: stretch; }
 
-/* חצי מגרש מוגדל */
+/* חצי מגרש - התאמתי את הגובה והריווח שיכנס גם לרוחב */
 .pitch-half {
-    flex: 1; max-width: 500px;
+    flex: 1; max-width: 480px; min-height: 380px; 
     background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%);
     border: 3px solid rgba(255,255,255,0.7); border-top: 3px dashed rgba(255,255,255,0.5);
-    border-radius: 0 0 25px 25px; position: relative;
-    display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0;
-    box-shadow: inset 0 -20px 50px rgba(0,0,0,0.5);
+    border-radius: 0 0 20px 20px; position: relative;
+    display: flex; flex-direction: column; justify-content: space-evenly; padding: 5px 0;
+    box-shadow: inset 0 -15px 30px rgba(0,0,0,0.5);
 }
-.pitch-half::before { content: ''; position: absolute; top: 0; left: 50%; width: 120px; height: 60px; border: 3px solid rgba(255,255,255,0.4); border-top: none; border-radius: 0 0 60px 60px; transform: translateX(-50%); pointer-events: none; }
-.pitch-half::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 220px; height: 90px; border: 3px solid rgba(255,255,255,0.4); border-bottom: none; transform: translateX(-50%); pointer-events: none; }
+.pitch-half::before { content: ''; position: absolute; top: 0; left: 50%; width: 100px; height: 50px; border: 3px solid rgba(255,255,255,0.4); border-top: none; border-radius: 0 0 50px 50px; transform: translateX(-50%); pointer-events: none; }
+.pitch-half::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 160px; height: 70px; border: 3px solid rgba(255,255,255,0.4); border-bottom: none; transform: translateX(-50%); pointer-events: none; }
 
-.pitch-row { display: flex; justify-content: space-evenly; width: 100%; z-index: 1; padding: 5px 0; }
+.pitch-row { display: flex; justify-content: space-evenly; width: 100%; z-index: 1; }
 
-/* עמדות שחקנים טקטיות (מלבניות) */
+/* קוביות טקטיות במגרש - הוקטנו מעט כדי שלא יחתכו לגובה */
 .drop-zone {
-    width: 105px; height: 75px; /* מלבן רחב לשמות מרובים */
-    border: 2px dashed rgba(255,255,255,0.6); border-radius: 12px;
+    width: 90px; height: 60px;
+    border: 2px dashed rgba(255,255,255,0.6); border-radius: 10px;
     display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.25);
     transition: 0.2s; cursor: pointer;
 }
 .drop-zone.highlight { border-color: var(--ios-green); background: rgba(48, 209, 88, 0.4); transform: scale(1.05); }
 
-/* אזור ספסל רספונסיבי למסך מלא */
-.bench-area { padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; max-height: 25vh; }
-.bench-area h3 { font-size: 16px; color: var(--text-secondary); text-align: center; }
-.bench-players-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; overflow-y: auto; padding-bottom: 10px; }
+/* ספסל */
+.bench-area { padding: 10px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; max-height: 22vh; cursor: pointer; }
+.bench-area h3 { font-size: 14px; color: var(--text-secondary); text-align: center; }
+.bench-players-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; overflow-y: auto; padding-bottom: 5px; }
 
-/* קלף שחקן בספסל */
+/* שחקן */
 .player-card {
-    background: var(--ios-blue); color: white; padding: 8px 16px; border-radius: 12px;
-    display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; user-select: none;
-    border: 3px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.3); min-width: 120px;
+    background: var(--ios-blue); color: white; padding: 6px 12px; border-radius: 12px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; user-select: none;
+    border: 3px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.3); min-width: 100px;
 }
-.player-card.selected { border-color: var(--ios-green); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(48,209,88,0.5); background: var(--ios-blue-active); }
-.player-number { background: white; color: var(--ios-blue); font-weight: bold; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 14px; flex-shrink: 0; }
-.player-name { font-size: 16px; font-weight: 600; white-space: nowrap; }
+.player-card.selected { border-color: var(--ios-green); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(48,209,88,0.5); background: var(--ios-blue-active); }
+.player-number { background: white; color: var(--ios-blue); font-weight: bold; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 13px; flex-shrink: 0; }
+.player-name { font-size: 15px; font-weight: 600; white-space: nowrap; }
 
-/* עיצוב "חולצת הרכב" כאשר השחקן מוצב במגרש */
+/* עיצוב שחקן בעמדה הטקטית במגרש */
 .drop-zone .player-card { 
-    width: 100%; height: 100%; padding: 4px; border-radius: 10px; flex-direction: column; 
-    justify-content: space-evenly; gap: 2px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+    width: 100%; height: 100%; padding: 2px; border-radius: 8px; flex-direction: column; 
+    justify-content: space-evenly; gap: 0; box-shadow: 0 3px 8px rgba(0,0,0,0.6); 
     background: rgba(10, 132, 255, 0.95); min-width: unset;
 }
-.drop-zone .player-card .player-number { 
-    width: 26px; height: 26px; font-size: 14px; border: 2px solid white; margin: 0 auto;
-}
-.drop-zone .player-card .player-name { 
-    font-size: 14px; font-weight: bold; width: 100%; text-align: center; 
-    white-space: normal; line-height: 1.1; overflow: hidden; /* מאפשר שתי שורות לשמות ארוכים */
-}
+.drop-zone .player-card .player-number { width: 22px; height: 22px; font-size: 12px; border: 2px solid white; margin: 0 auto; }
+.drop-zone .player-card .player-name { font-size: 12px; font-weight: bold; width: 100%; text-align: center; white-space: normal; line-height: 1.1; overflow: hidden; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
