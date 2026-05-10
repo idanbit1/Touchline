@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- State Management ---
     let matchState = JSON.parse(localStorage.getItem('touchlineMatchState')) || {
         isActive: false, timerRunning: false, elapsedSeconds: 0, currentHalf: 1, 
         scores: { myTeam1: 0, opp1: 0, myTeam2: 0, opp2: 0 }, lastTickTime: null
@@ -8,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveState() { localStorage.setItem('touchlineMatchState', JSON.stringify(matchState)); }
 
-    // --- Clocks & Timers ---
     function updateClocks() {
         document.getElementById('live-date').textContent = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         
@@ -45,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Navigation Flow ---
     const screens = {
         home: document.getElementById('home-screen'),
         setup: document.getElementById('setup-screen'),
@@ -73,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('nav-attendance').addEventListener('click', () => switchScreen('attendance'));
     document.getElementById('nav-lineup').addEventListener('click', () => switchScreen('lineup'));
     document.getElementById('nav-live').addEventListener('click', () => switchScreen('live'));
-    
     document.getElementById('btn-new-match').addEventListener('click', () => switchScreen('setup'));
     
     const resumeBtn = document.getElementById('btn-resume-match');
@@ -88,17 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
         else document.exitFullscreen();
     });
 
-    // --- SETUP: Roster Management ---
+    // --- SETUP: Roster ---
     const playersContainer = document.getElementById('players-list-container');
     function createSetupPlayerRow(name = '', number = '') {
         const row = document.createElement('div');
         row.className = 'player-input-row';
-        row.innerHTML = `<input type="text" class="p-name" placeholder="שם מלא" value="${name}"><input type="number" class="p-number" placeholder="מס'" value="${number}"><button type="button" class="btn-remove-player">X</button>`;
+        row.innerHTML = `<input type="text" class="p-name" placeholder="שם מלא" value="${name}"><input type="number" class="p-number" placeholder="מס'" value="${number}"><button type="button" class="btn-remove-player" title="מחק">X</button>`;
         row.querySelector('.btn-remove-player').addEventListener('click', () => row.remove());
         playersContainer.appendChild(row);
     }
 
-    // טעינת סגל קבוע בטעינת העמוד
     const defaultRoster = JSON.parse(localStorage.getItem('defaultRoster'));
     if(defaultRoster && defaultRoster.length > 0) {
         defaultRoster.forEach(p => createSetupPlayerRow(p.name, p.number));
@@ -107,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('btn-add-player').addEventListener('click', () => createSetupPlayerRow());
-
     document.getElementById('btn-load-excel').addEventListener('click', () => document.getElementById('file-excel').click());
     document.getElementById('file-excel').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -128,10 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsArrayBuffer(file); e.target.value = ''; 
     });
 
-    // --- SETUP Submit -> Go to Attendance ---
     document.getElementById('setup-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        
+        matchState = { isActive: true, timerRunning: false, elapsedSeconds: 0, currentHalf: 1, scores: { myTeam1: 0, opp1: 0, myTeam2: 0, opp2: 0 }, lastTickTime: null };
+        saveState();
+
         const matchData = {
             myTeam: document.getElementById('my-team-name').value,
             opponent: document.getElementById('opponent-name').value,
@@ -155,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('attendance');
     });
 
-    // --- ATTENDANCE SCREEN ---
+    // --- ATTENDANCE ---
     function buildAttendanceList(roster) {
         const attContainer = document.getElementById('attendance-list-container');
         attContainer.innerHTML = '';
@@ -173,24 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAttCount();
     }
 
-    function updateAttCount() {
-        document.getElementById('total-arrived-count').textContent = document.querySelectorAll('.att-checkbox:checked').length;
-    }
-
+    function updateAttCount() { document.getElementById('total-arrived-count').textContent = document.querySelectorAll('.att-checkbox:checked').length; }
     document.getElementById('btn-back-to-setup').addEventListener('click', () => switchScreen('setup'));
 
     document.getElementById('btn-confirm-attendance').addEventListener('click', () => {
         const roster = JSON.parse(localStorage.getItem('defaultRoster')) || [];
         const matchSquad = [];
-        
         roster.forEach(p => {
             const cb = document.getElementById(`att_${p.id}`);
             if(cb && cb.checked) matchSquad.push(p);
         });
-        
         localStorage.setItem('tacticalPlayers', JSON.stringify(matchSquad));
         
-        // איפוס נתוני המשחק לטובת משחק חדש
         matchState = { isActive: false, timerRunning: false, elapsedSeconds: 0, currentHalf: 1, scores: { myTeam1: 0, opp1: 0, myTeam2: 0, opp2: 0 }, lastTickTime: null };
         saveState();
         document.getElementById('btn-resume-match').classList.remove('hidden');
@@ -199,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('lineup');
     });
 
-    // --- LINEUP SCREEN ---
+    // --- LINEUP ---
     let selectedCard = null;
 
     function initLineupBuilder() {
@@ -216,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
             benchContainer.appendChild(card);
         });
 
-        // יצירת מגרשים להרכב
         for(let i = 1; i <= 2; i++) {
             const pitch = document.createElement('div');
             pitch.className = 'pitch-half'; pitch.id = `lineup_pitch_${i}`;
@@ -309,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         livePitch1.innerHTML = ''; livePitch2.innerHTML = ''; liveBench.innerHTML = '';
         
-        // העברת האלמנטים פיזית למסך הלייב כדי לשמור על האובייקטים והלחיצות
         livePitch1.appendChild(document.getElementById('lineup_pitch_1'));
         livePitch2.appendChild(document.getElementById('lineup_pitch_2'));
         
@@ -317,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
             liveBench.appendChild(document.getElementById('bench-players').firstChild);
         }
         
-        // עדכון אירוע קליק לספסל הלייב
         document.getElementById('live-bench-area').addEventListener('click', function() {
             if(selectedCard) { liveBench.appendChild(selectedCard); selectedCard.classList.remove('selected'); selectedCard = null; }
         });
@@ -345,7 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     });
 
-    // 40% Rule - חישוב מבוסס זמן
     function check40PercentRule() {
         const players = JSON.parse(localStorage.getItem('tacticalPlayers')) || [];
         const matchData = JSON.parse(localStorage.getItem('tacticalMatchData')) || { duration: 70 };
@@ -356,9 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
         players.forEach(p => {
             const card = document.getElementById(p.id);
             if(card) {
-                // אם מה שחסר לו קרוב או גדול ממה שנשאר במשחק - סכנה, חייב לשחק עכשיו
                 const needed = requiredSecs - p.secondsPlayed;
-                if (needed > 0 && needed >= (remainingSecs - 60)) { // נותן מרווח ביטחון של דקה
+                if (needed > 0 && needed >= (remainingSecs - 60)) {
                     card.classList.add('alert-40');
                 } else {
                     card.classList.remove('alert-40');
@@ -384,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('live-score-total').textContent = `${s.myTeam1+s.myTeam2} - ${s.opp1+s.opp2}`;
     }
 
-    // ניהול תוצאות וכפתורי פוס
+    // ניהול תוצאות מול הכפתורים החדשים
     document.querySelectorAll('.btn-goal-opp').forEach(btn => {
         btn.addEventListener('click', function() {
             const pitch = this.getAttribute('data-pitch');
@@ -403,13 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
             pendingGoalPitch = this.getAttribute('data-pitch');
             const isPlus = this.classList.contains('plus');
             
-            if(!isPlus) { // לחצן פוס (ביטול גול)
+            if(!isPlus) { 
                 if(pendingGoalPitch==='1') matchState.scores.myTeam1 = Math.max(0, matchState.scores.myTeam1 - 1);
                 else matchState.scores.myTeam2 = Math.max(0, matchState.scores.myTeam2 - 1);
                 saveState(); renderScores(); return;
             }
 
-            // בחירת שחקן כובש (חלון קופץ)
             const pitchEl = document.getElementById(`lineup_pitch_${pendingGoalPitch}`);
             const playersOnPitch = pitchEl.querySelectorAll('.player-card');
             const listGrid = document.getElementById('goal-scorers-list');
@@ -420,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
             playersOnPitch.forEach(card => {
                 const b = document.createElement('button');
                 b.className = 'ios-button-small';
-                b.textContent = card.querySelector('.player-name').textContent;
-                b.style.padding = '15px'; b.style.background = 'var(--ios-blue)';
+                b.textContent = card.querySelector('.player-name').textContent + ` (${card.querySelector('.player-number').textContent})`;
+                b.style.padding = '15px 25px'; b.style.background = 'var(--ios-blue)'; b.style.fontSize = '18px';
                 
                 b.addEventListener('click', () => {
                     const players = JSON.parse(localStorage.getItem('tacticalPlayers'));
@@ -441,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('btn-cancel-goal-modal').addEventListener('click', () => goalModal.classList.add('hidden'));
 
-    // --- סיום מחצית וייצוא דוח ---
+    // --- סיכום מחצית וסיום ---
     const summaryModal = document.getElementById('summary-modal');
     document.getElementById('btn-end-half').addEventListener('click', () => {
         matchState.timerRunning = false; saveState();
@@ -478,7 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryModal.classList.add('hidden');
         document.getElementById('btn-end-half').textContent = 'סיים משחק סופית';
         
-        // מחזיר לתכנון הרכב מחצית 2
         document.getElementById('pitches-container').appendChild(document.getElementById('lineup_pitch_1'));
         document.getElementById('pitches-container').appendChild(document.getElementById('lineup_pitch_2'));
         const bench = document.getElementById('bench-players');
@@ -486,8 +468,17 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('lineup');
     });
 
+    // ייצוא מותאם שייכנס בעמוד אחד
     document.getElementById('btn-export-pdf').addEventListener('click', () => {
         const el = document.getElementById('summary-content-area');
-        html2pdf().set({ margin: 10, filename: 'Match_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }).from(el).save();
+        const opt = {
+            margin:       [5, 5, 5, 5], 
+            filename:     'סיכום_משחק_Touchline.pdf',
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak:    { mode: ['avoid-all'] }
+        };
+        html2pdf().set(opt).from(el).save();
     });
 });
