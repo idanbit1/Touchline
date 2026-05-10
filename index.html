@@ -410,12 +410,12 @@
 
             // --- State Management & Storage ---
             let matchState = JSON.parse(localStorage.getItem('touchlineMatchState')) || null;
-            let savedMatches = JSON.parse(localStorage.getItem('touchlineSavedMatches')) || []; // רשימת כל המשחקים
+            let savedMatches = JSON.parse(localStorage.getItem('touchlineSavedMatches')) || []; 
 
             function saveState() { 
                 if(matchState) {
                     localStorage.setItem('touchlineMatchState', JSON.stringify(matchState)); 
-                    updateSavedMatchesList(); // מעדכן ברשימת המשחקים
+                    updateSavedMatchesList(); 
                 }
             }
 
@@ -424,7 +424,7 @@
                 const matchData = JSON.parse(localStorage.getItem('tacticalMatchData'));
                 if(!matchData) return;
                 
-                const matchId = matchData.date + '_' + matchData.time; // מזהה ייחודי
+                const matchId = matchData.date + '_' + matchData.time; 
                 const existingIdx = savedMatches.findIndex(m => m.id === matchId);
                 
                 const snapshot = {
@@ -460,7 +460,7 @@
                 savedMatches.forEach(match => {
                     const cube = document.createElement('div');
                     cube.className = 'match-cube';
-                    // הבהוב ירוק אם זה המשחק הנוכחי שרץ באפליקציה
+                    
                     if(match.id === currentId && match.state && match.state.isActive) {
                         cube.classList.add('active-match');
                     }
@@ -471,19 +471,17 @@
                         <p>${match.date}</p>
                     `;
                     
-                    // טעינת המשחק בלחיצה על הקובייה
                     cube.addEventListener('click', (e) => {
                         if(e.target.classList.contains('btn-delete-match')) return;
                         loadMatchSnapshot(match);
                     });
 
-                    // מחיקת משחק
                     cube.querySelector('.btn-delete-match').addEventListener('click', (e) => {
                         e.stopPropagation();
                         if(confirm('האם למחוק משחק זה?')) {
                             savedMatches = savedMatches.filter(m => m.id !== match.id);
                             localStorage.setItem('touchlineSavedMatches', JSON.stringify(savedMatches));
-                            if(match.id === currentId) { // איפוס אם זה המשחק הנוכחי
+                            if(match.id === currentId) { 
                                 localStorage.removeItem('touchlineMatchState');
                                 localStorage.removeItem('tacticalMatchData');
                                 localStorage.removeItem('tacticalPlayers');
@@ -507,7 +505,7 @@
                 checkResumeButton();
                 
                 if(matchState.isActive) {
-                    initLineupBuilder(); // לבנות מחדש אובייקטים
+                    initLineupBuilder(); 
                     switchScreen('live');
                 } else {
                     switchScreen('setup');
@@ -550,7 +548,6 @@
                             imported.title = `${imported.data.myTeam} נגד ${imported.data.opponent}`;
                             imported.date = imported.data.date;
                             
-                            // מניעת כפילויות ברשימה
                             const existingIdx = savedMatches.findIndex(m => m.id === matchId);
                             if(existingIdx > -1) savedMatches[existingIdx] = imported;
                             else savedMatches.push(imported);
@@ -637,7 +634,6 @@
                 if(screenName === 'live') {
                     renderScores();
                     updateTeamNames();
-                    // ודא שהמגרשים והספסל נמצאים בלייב
                     document.getElementById('live-pitch-1-container').appendChild(document.getElementById('lineup_pitch_1') || createEmptyPitch(1));
                     document.getElementById('live-pitch-2-container').appendChild(document.getElementById('lineup_pitch_2') || createEmptyPitch(2));
                     const liveBench = document.getElementById('live-bench-players');
@@ -651,7 +647,6 @@
                 }
             }
 
-            // פונקציית גיבוי ליצירת מגרש אם אבד
             function createEmptyPitch(i) {
                 const pitch = document.createElement('div');
                 pitch.className = 'pitch-half'; pitch.id = `lineup_pitch_${i}`;
@@ -677,9 +672,9 @@
             
             document.getElementById('btn-new-match').addEventListener('click', () => {
                 matchState = null;
-                localStorage.removeItem('tacticalMatchData'); // איפוס תכנון קודם למשחק חדש
+                localStorage.removeItem('tacticalMatchData'); 
                 document.getElementById('setup-form').reset();
-                document.getElementById('my-team-name').value = "מ.ס רובי שפירא"; // ברירת מחדל
+                document.getElementById('my-team-name').value = "מ.ס רובי שפירא"; 
                 switchScreen('setup');
             });
             
@@ -787,7 +782,6 @@
                 });
                 localStorage.setItem('tacticalPlayers', JSON.stringify(matchSquad));
                 
-                // איפוס State למשחק חדש לאחר קביעת נוכחות (אם לא הוגדר אחרת דרך טעינה)
                 if(!matchState) {
                     matchState = { isActive: false, timerRunning: false, elapsedSeconds: 0, currentHalf: 1, scores: { myTeam1: 0, opp1: 0, myTeam2: 0, opp2: 0 }, lastTickTime: null };
                 }
@@ -806,7 +800,6 @@
                 const pitchesContainer = document.getElementById('pitches-container');
                 const benchContainer = document.getElementById('bench-players');
                 
-                // מניעת יצירה כפולה אם המגרשים כבר קיימים בלייב
                 if(!document.getElementById('lineup_pitch_1')) {
                     pitchesContainer.innerHTML = ''; 
                     for(let i = 1; i <= 2; i++) {
@@ -814,17 +807,14 @@
                         pitchesContainer.appendChild(pitch);
                     }
                 } else {
-                    // החזר מהלייב
                     pitchesContainer.appendChild(document.getElementById('lineup_pitch_1'));
                     pitchesContainer.appendChild(document.getElementById('lineup_pitch_2'));
                 }
 
-                // עדכון שחקני ספסל
                 benchContainer.innerHTML = '';
                 const liveBench = document.getElementById('live-bench-players');
                 while(liveBench && liveBench.firstChild) benchContainer.appendChild(liveBench.firstChild);
 
-                // יצירת שחקנים מחדש רק אם לא קיימים במגרש או בספסל
                 players.forEach(p => {
                     if(!document.getElementById(p.id)) {
                         const card = document.createElement('div');
@@ -958,7 +948,6 @@
                     const card = document.getElementById(p.id);
                     if(card) {
                         const needed = requiredSecs - p.secondsPlayed;
-                        // אם הזמן שחסר לו קרוב לזמן שנשאר במשחק - אזהרה
                         if (needed > 0 && needed >= (remainingSecs - 60)) {
                             card.classList.add('alert-40');
                         } else {
@@ -986,7 +975,6 @@
                 document.getElementById('live-score-total').textContent = `${s.myTeam1+s.myTeam2} - ${s.opp1+s.opp2}`;
             }
 
-            // יריבה גולים וביטול
             document.querySelectorAll('.btn-goal-opp').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const pitch = this.getAttribute('data-pitch');
@@ -1000,7 +988,6 @@
             let pendingGoalPitch = 0;
             const goalModal = document.getElementById('goal-modal');
 
-            // הקבוצה שלנו גולים וביטול
             document.querySelectorAll('.btn-goal-mine').forEach(btn => {
                 btn.addEventListener('click', function() {
                     pendingGoalPitch = this.getAttribute('data-pitch');
@@ -1081,11 +1068,9 @@
                 summaryModal.classList.add('hidden');
                 document.getElementById('btn-end-half').textContent = 'סיים משחק סופית';
                 
-                // מחזיר למסך תכנון להמשך מחצית
                 switchScreen('lineup');
             });
 
-            // ייצוא מותאם שייכנס בעמוד אחד
             document.getElementById('btn-export-pdf').addEventListener('click', () => {
                 const el = document.getElementById('summary-content-area');
                 const opt = {
@@ -1099,7 +1084,6 @@
                 html2pdf().set(opt).from(el).save();
             });
             
-            // תצוגת משחקים ראשונית בעליית המערכת
             renderSavedMatchesGrid();
             checkResumeButton();
         });
