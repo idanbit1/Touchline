@@ -11,40 +11,70 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-    <div class="background-gradient"></div>
+    <div class="background-stadium"></div>
+    <div class="background-overlay"></div>
 
     <div class="app-container">
-        <!-- אזור עליון - ניווט -->
         <header class="top-bar glass-panel">
             <div class="nav-buttons">
                 <button id="nav-home" class="ios-button-small">ראשי</button>
-                <button id="nav-setup" class="ios-button-small">הגדרות</button>
+                <button id="nav-players" class="ios-button-small">ניהול סגל</button>
+                <button id="nav-setup" class="ios-button-small" style="display:none;">הגדרות משחק</button>
                 <button id="nav-attendance" class="ios-button-small" style="display:none;">נוכחות</button>
                 <button id="nav-lineup" class="ios-button-small" style="display:none;">הרכב</button>
                 <button id="nav-live" class="ios-button-small" style="display:none; background: rgba(48, 209, 88, 0.3);">לייב 🔴</button>
                 <button id="btn-fullscreen" class="ios-button-small">מסך מלא 🔲</button>
             </div>
-            <div id="live-date" class="date-display">טוען תאריך...</div>
+            <div class="top-info-area">
+                <div id="live-time-date" class="date-display">טוען...</div>
+                <div class="credit-text">produced by Idan Biton</div>
+            </div>
         </header>
 
-        <!-- 1. מסך הבית -->
         <main id="home-screen" class="screen active">
             <div class="hero-section glass-panel">
                 <div class="logo-container">
-                    <h1 class="system-title">T<span class="bouncing-ball" style="display: inline-block;">⚽️</span>uchline</h1>
+                    <h1 class="system-title">
+                        <span class="touch-t">T<span class="finger-icon">👆</span></span>ouch<span class="line-underline">line</span>
+                    </h1>
                 </div>
-                <p class="subtitle">ניהול משחק כדורגל בזמן אמת</p>
-                <button id="btn-new-match" class="ios-button primary-action">התחלת משחק חדש</button>
-                <button id="btn-resume-match" class="ios-button active-match-widget hidden">
-                    <div class="pulse-indicator"></div><span>עבור למשחק הפעיל (לייב/שמור)</span>
-                </button>
+                
+                <button id="btn-new-match" class="ios-button primary-action btn-large">התחלת משחק חדש</button>
+                
+                <div id="active-match-container" class="hidden" style="margin-top: 30px;">
+                    </div>
+            </div>
+
+            <div class="saved-matches-area glass-panel" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; text-align: center;">משחקים שמורים שהסתיימו</h3>
+                <div id="saved-matches-grid" class="saved-matches-grid">
+                    </div>
             </div>
         </main>
 
-        <!-- 2. מסך הגדרות וסגל -->
+        <main id="players-screen" class="screen">
+            <div class="setup-container glass-panel">
+                <h2>ניהול סגל קבוצה ראשי</h2>
+                <p style="text-align:center; color:var(--text-secondary); margin-bottom: 20px;">כאן מנהלים את רשימת השחקנים הקבועה. הרשימה תהיה זמינה בכל פתיחת משחק חדש.</p>
+                
+                <div class="players-header">
+                    <div class="players-actions" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
+                        <button type="button" id="btn-load-excel" class="ios-button-small">ייבוא מאקסל</button>
+                        <input type="file" id="file-excel" accept=".xlsx, .xls, .csv" style="display:none;">
+                        <button type="button" id="btn-export-excel" class="ios-button-small" style="background: rgba(10, 132, 255, 0.3);">ייצא קובץ שחקנים</button>
+                    </div>
+                </div>
+                
+                <div id="players-list-container" class="players-list-container"></div>
+                
+                <button type="button" id="btn-add-player" class="ios-button primary-action" style="width:100%; margin-top:15px;">+ הוסף שחקן לסגל</button>
+                <button type="button" id="btn-save-roster" class="ios-button" style="width:100%; margin-top:10px; background:var(--ios-green); color:white;">שמור שינויים בסגל</button>
+            </div>
+        </main>
+
         <main id="setup-screen" class="screen">
             <div class="setup-container glass-panel">
-                <h2>הגדרות משחק וסגל הקבוצה</h2>
+                <h2>הגדרות משחק</h2>
                 <form id="setup-form" class="setup-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -80,27 +110,13 @@
                             <select id="match-duration"><option value="70" selected>70 דק' (35/מחצית)</option><option value="60">60 דק'</option><option value="90">90 דק'</option></select>
                         </div>
                     </div>
-
-                    <div class="players-setup-section">
-                        <div class="players-header">
-                            <label>רשימת שחקני הסגל הקבועה</label>
-                            <div class="players-actions">
-                                <button type="button" id="btn-load-excel" class="ios-button-small">טען מאקסל</button>
-                                <input type="file" id="file-excel" accept=".xlsx, .xls, .csv" style="display:none;">
-                            </div>
-                        </div>
-                        <div id="players-list-container" class="players-list-container"></div>
-                        <button type="button" id="btn-add-player" class="ios-button-small add-btn">+ הוסף שחקן לסגל</button>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="ios-button primary-action" style="width: 100%;">שמור והמשך לבדיקת נוכחות</button>
+                    <div class="form-actions" style="margin-top: 30px;">
+                        <button type="submit" class="ios-button primary-action" style="width: 100%;">המשך לבדיקת נוכחות</button>
                     </div>
                 </form>
             </div>
         </main>
 
-        <!-- 3. מסך נוכחות משחק -->
         <main id="attendance-screen" class="screen">
             <div class="setup-container glass-panel">
                 <h2>בדיקת נוכחות למשחק</h2>
@@ -110,45 +126,40 @@
                 <div id="attendance-list-container" class="attendance-list-container"></div>
                 
                 <div class="form-actions" style="margin-top:30px;">
-                    <button id="btn-back-to-setup" class="ios-button secondary-action">חזור להגדרות</button>
-                    <button id="btn-confirm-attendance" class="ios-button primary-action">אשר נוכחות ועבור להרכב</button>
+                    <button id="btn-confirm-attendance" class="ios-button primary-action" style="width:100%;">אשר נוכחות ועבור להרכב</button>
                 </div>
             </div>
         </main>
 
-        <!-- 4. מסך תכנון הרכב -->
         <main id="lineup-screen" class="screen">
             <div class="lineup-container">
                 <div class="lineup-header glass-panel">
-                    <h2>תכנון הרכבים (משחקים / מחצית שניה)</h2>
+                    <h2 id="lineup-title">תכנון הרכב מחצית ראשונה</h2>
                     <button id="btn-go-live" class="ios-button primary-action" style="background-color: var(--ios-green);">עבור לניהול משחק ⚽️</button>
                 </div>
                 <div class="lineup-saves glass-panel">
-                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור הרכב נוכחי 1</button>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור הרכב 1</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="1">טען הרכב 1</button>
                     <span class="divider">|</span>
                     <button type="button" class="ios-button-small save-lineup" data-slot="2">שמור הרכב 2</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="2">טען הרכב 2</button>
                     <span class="divider">|</span>
+                    <button type="button" id="btn-load-h1-lineup" class="ios-button-small" style="display:none; background: rgba(10, 132, 255, 0.3);">טען הרכב מחצית 1</button>
                     <button type="button" id="btn-clear-lineup" class="ios-button-small" style="color: #ff453a; border-color: #ff453a;">נקה הרכב 🗑️</button>
                 </div>
                 
-                <!-- פריסת מגרשים וספסל זהה ללייב -->
                 <div class="tactical-area">
                     <div id="pitches-container" class="pitches-wrapper"></div>
                 </div>
                 <div id="bench-area" class="bench-area glass-panel">
-                    <h3>ספסל שחקנים נוכחים (לשיבוץ הרכב)</h3>
+                    <h3>ספסל שחקנים נוכחים</h3>
                     <div id="bench-players" class="bench-players-list"></div>
                 </div>
             </div>
         </main>
 
-        <!-- 5. מסך המשחק החי -->
         <main id="live-match-screen" class="screen">
             <div class="live-container">
-                
-                <!-- סרגל מרכזי עליון: תוצאה ושעון -->
                 <div class="live-master-header glass-panel">
                     <div class="master-score-container">
                         <span class="master-label">תוצאה כוללת</span>
@@ -163,22 +174,16 @@
                     </div>
                 </div>
 
-                <!-- אזור מגרשים ולייב במבנה מסודר (המגרשים למעלה, הספסל למטה) -->
                 <div class="live-body">
                     <div id="live-pitches-container" class="pitches-wrapper">
-                        
-                        <!-- מגרש 1 (ימין) -->
                         <div class="pitch-column">
                             <div class="pro-scoreboard glass-panel">
-                                <!-- קבוצה שלי -->
                                 <div class="team-score">
                                     <div class="team-name my-team-label">רובי שפירא</div>
                                     <button class="btn-goal btn-goal-mine plus" data-pitch="1">⚽️ שער לנו</button>
                                     <button class="btn-goal-cancel btn-goal-mine minus" data-pitch="1">ביטול שער</button>
                                 </div>
-                                <!-- תוצאה -->
                                 <div class="score-center"><div id="live-score-1">0 - 0</div></div>
-                                <!-- קבוצה יריבה -->
                                 <div class="team-score">
                                     <div class="team-name opp-team-label">יריבה</div>
                                     <button class="btn-goal btn-goal-opp plus" data-pitch="1">⚽️ שער יריבה</button>
@@ -187,19 +192,14 @@
                             </div>
                             <div id="live-pitch-1-container" class="pitch-mount"></div>
                         </div>
-                        
-                        <!-- מגרש 2 (שמאל) -->
                         <div class="pitch-column">
                             <div class="pro-scoreboard glass-panel">
-                                <!-- קבוצה שלי -->
                                 <div class="team-score">
                                     <div class="team-name my-team-label">רובי שפירא</div>
                                     <button class="btn-goal btn-goal-mine plus" data-pitch="2">⚽️ שער לנו</button>
                                     <button class="btn-goal-cancel btn-goal-mine minus" data-pitch="2">ביטול שער</button>
                                 </div>
-                                <!-- תוצאה -->
                                 <div class="score-center"><div id="live-score-2">0 - 0</div></div>
-                                <!-- קבוצה יריבה -->
                                 <div class="team-score">
                                     <div class="team-name opp-team-label">יריבה</div>
                                     <button class="btn-goal btn-goal-opp plus" data-pitch="2">⚽️ שער יריבה</button>
@@ -208,10 +208,7 @@
                             </div>
                             <div id="live-pitch-2-container" class="pitch-mount"></div>
                         </div>
-
                     </div>
-
-                    <!-- ספסל המשחק (ממוקם תמיד בתחתית המסך מתחת ל-2 המגרשים) -->
                     <div id="live-bench-area" class="bench-area glass-panel">
                         <h3>ספסל שחקנים בזמן אמת <span style="color:var(--ios-red); font-size:12px;">(אדום מהבהב = להכניס מיד לחוק 40%)</span></h3>
                         <div id="live-bench-players" class="bench-players-list"></div>
@@ -220,17 +217,14 @@
             </div>
         </main>
         
-        <!-- חלון בחירת כובש -->
         <div id="goal-modal" class="modal-overlay hidden">
             <div class="modal-content glass-panel">
                 <h3>מי כבש את השער?</h3>
-                <p>בחר שחקן שנמצא במגרש הנוכחי:</p>
                 <div id="goal-scorers-list" class="scorers-grid"></div>
                 <button id="btn-cancel-goal-modal" class="ios-button secondary-action" style="margin-top:20px; width:100%;">ביטול / טעות בלחיצה</button>
             </div>
         </div>
 
-        <!-- חלון סיכום ו-PDF מותאם להדפסה -->
         <div id="summary-modal" class="modal-overlay hidden">
             <div class="modal-content glass-panel" id="summary-content-area" style="max-width: 900px; width: 95%;">
                 <h2 id="summary-title" style="margin-bottom: 5px;">סיכום משחק</h2>
@@ -247,7 +241,7 @@
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px; justify-content:center;" class="no-print">
                     <button id="btn-export-pdf" class="ios-button primary-action">ייצא דוח PDF</button>
-                    <button id="btn-continue-match" class="ios-button secondary-action">טען הרכב מחצית 2</button>
+                    <button id="btn-continue-match" class="ios-button secondary-action">עבור למחצית שניה</button>
                     <button id="btn-close-summary" class="ios-button secondary-action">סגור חלון</button>
                 </div>
             </div>
