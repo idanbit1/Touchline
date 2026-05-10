@@ -5,174 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Touchline - by Idan Biton</title>
-    
+    <title>Touchline - מערכת ניהול משחק</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <style>
-        /* =========================================
-           עיצוב (CSS)
-           ========================================= */
-        :root {
-            --ios-blue: #0A84FF; --ios-blue-active: #006ee6; --ios-green: #30d158; --ios-red: #ff453a;
-            --ios-bg-light: rgba(255, 255, 255, 0.15); --ios-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #ffffff; --text-secondary: rgba(235, 235, 245, 0.6);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #1c1c1e; color: var(--text-primary); overflow: hidden; height: 100vh; width: 100vw; display: flex; flex-direction: column; }
-        .background-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 120%, #1a4a25 0%, #000000 80%); z-index: -1; }
-        .app-container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 10px; max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
-        .glass-panel { background: var(--ios-bg-light); backdrop-filter: blur(20px); border: 1px solid var(--ios-border); border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-
-        /* Top Nav & Version */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; margin-bottom: 10px; flex-shrink: 0; }
-        .nav-buttons { display: flex; gap: 8px; }
-        .version-info { font-size: 14px; color: var(--text-secondary); text-align: left; }
-        
-        .screen { display: none; flex: 1; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
-        .screen.active { display: flex; }
-
-        /* Home Screen */
-        .hero-section { text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; margin: auto 0; flex-shrink: 0; }
-        .system-title { font-size: 64px; font-weight: 800; letter-spacing: 2px; }
-        .bouncing-ball { font-size: 45px; animation: bounce 1.5s infinite ease-in-out; display: inline-block; }
-        .credit { font-size: 24px; color: var(--ios-blue); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }
-        
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-        /* Saved Matches Grid on Home Screen */
-        .home-actions { display: flex; gap: 15px; margin-top: 10px; }
-        .saved-matches-area { flex: 1; overflow-y: auto; padding: 10px; margin-top: 10px; border-top: 1px solid var(--ios-border); width: 100%; }
-        .saved-matches-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-        .match-cube { background: rgba(0,0,0,0.4); border: 2px solid var(--ios-border); border-radius: 16px; padding: 15px; width: 280px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
-        .match-cube:hover { transform: scale(1.02); }
-        .match-cube h3 { font-size: 18px; margin-bottom: 5px; }
-        .match-cube p { font-size: 14px; color: var(--text-secondary); }
-        .match-cube.active-match { border-color: var(--ios-green); animation: pulseGreen 2s infinite; }
-        .btn-delete-match { position: absolute; top: 10px; left: 10px; background: rgba(255,69,58,0.2); color: var(--ios-red); border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
-
-        /* Buttons */
-        .ios-button { font-size: 16px; font-weight: 600; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; transition: 0.2s; }
-        .ios-button:active { transform: scale(0.96); }
-        .primary-action { background-color: var(--ios-blue); color: white; }
-        .secondary-action { background-color: transparent; color: white; border: 1px solid var(--ios-border); }
-        .ios-button-small { background: rgba(255,255,255,0.15); border: 1px solid var(--ios-border); color: white; padding: 8px 12px; border-radius: 10px; font-size: 14px; cursor: pointer; }
-
-        /* Setup & Attendance */
-        .setup-container { width: 100%; max-width: 850px; padding: 25px; overflow-y: auto; margin: auto; }
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .form-group { flex: 1; display: flex; flex-direction: column; text-align: right; }
-        .form-group label { font-size: 15px; color: var(--text-secondary); margin-bottom: 5px; }
-        .form-group input, .form-group select { padding: 12px; border-radius: 10px; border: 1px solid var(--ios-border); background: rgba(0,0,0,0.3); color: white; font-size: 16px; }
-
-        .player-input-row, .attendance-row { display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        .player-input-row input[type="text"] { flex: 2; font-size: 20px; font-weight: 600; padding: 12px; }
-        .player-input-row input[type="number"] { flex: 1; text-align: center; font-weight: 800; font-size: 22px; padding: 12px; }
-        .btn-remove-player { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.5); padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 20px; cursor: pointer; }
-
-        .attendance-summary { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; border: 1px solid var(--ios-border); }
-        .attendance-list-container { max-height: 45vh; overflow-y: auto; }
-        .att-checkbox { width: 28px; height: 28px; accent-color: var(--ios-green); cursor: pointer; }
-        .att-name { flex: 1; font-size: 20px; font-weight: 600; }
-        .att-num { font-size: 22px; font-weight: bold; background: var(--ios-blue); padding: 4px 15px; border-radius: 10px; }
-
-        /* Lineup Layout */
-        .lineup-container, .live-container { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
-        .lineup-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; flex-shrink: 0; }
-        .lineup-saves { display: flex; justify-content: center; gap: 10px; padding: 8px; flex-shrink: 0; }
-
-        .tactical-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-        .live-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-
-        .pitches-wrapper { display: flex; gap: 20px; width: 100%; flex: 1; justify-content: center; align-items: stretch; overflow-y: auto; padding: 5px; }
-        .pitch-column { flex: 1; max-width: 50%; display: flex; flex-direction: column; gap: 10px; }
-        .pitch-mount { flex: 1; display: flex; flex-direction: column; }
-
-        /* Pitch */
-        .pitch-half { flex: 1; width: 100%; min-height: 380px; background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%); border: 3px solid rgba(255,255,255,0.7); border-radius: 15px; position: relative; display: flex; flex-direction: column; justify-content: space-evenly; padding: 5px 0; box-shadow: inset 0 -15px 30px rgba(0,0,0,0.5); }
-        .pitch-half::before { content: ''; position: absolute; top: 0; left: 50%; width: 120px; height: 60px; border: 3px solid rgba(255,255,255,0.4); border-top: none; border-radius: 0 0 60px 60px; }
-        .pitch-row { display: flex; justify-content: space-evenly; width: 100%; z-index: 1; }
-        .drop-zone { width: 95px; height: 65px; border: 2px dashed rgba(255,255,255,0.6); border-radius: 10px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.25); cursor: pointer; }
-
-        /* Bench (Full Width Bottom) */
-        .bench-area { padding: 10px 20px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; height: 180px; border-radius: 16px; margin-top: 10px; }
-        .bench-area h3 { font-size: 15px; color: var(--text-secondary); text-align: center; margin-bottom: 5px; }
-        .bench-players-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; overflow-y: auto; align-items: flex-start; }
-
-        /* Player Cards */
-        .player-card { background: var(--ios-blue); color: white; padding: 8px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 3px solid transparent; min-width: 120px; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .player-card.selected { border-color: var(--ios-green); transform: translateY(-3px); background: var(--ios-blue-active); box-shadow: 0 6px 15px rgba(48,209,88,0.5); }
-        .player-card.alert-40 { border-color: var(--ios-red); animation: pulseAlert 1.5s infinite; background: rgba(255, 69, 58, 0.4); }
-        .player-number { background: white; color: var(--ios-blue); font-weight: bold; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 14px; flex-shrink: 0; }
-        .player-name { font-weight: 600; white-space: nowrap; }
-
-        .drop-zone .player-card { width: 100%; height: 100%; padding: 4px; border-radius: 8px; flex-direction: column; justify-content: space-evenly; background: rgba(10, 132, 255, 0.95); min-width: unset; animation: none; border-color: transparent;}
-        .drop-zone .player-card .player-number { width: 24px; height: 24px; font-size: 14px; border: 2px solid white; }
-        .drop-zone .player-card .player-name { font-size: 12px; white-space: normal; line-height: 1.1; font-weight: bold; text-align: center; width: 100%; }
-
-        /* --- Live Match Dashboard --- */
-        .live-master-header { display: flex; justify-content: center; align-items: center; gap: 80px; padding: 15px; flex-shrink: 0; }
-        .master-score-container { text-align: center; }
-        .master-label { font-size: 16px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .master-score { font-size: 56px; font-weight: 900; color: var(--ios-green); font-variant-numeric: tabular-nums; line-height: 1; }
-
-        .master-timer-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .master-timer { font-size: 64px; font-weight: bold; font-variant-numeric: tabular-nums; line-height: 1; }
-        .master-timer.injury { color: var(--ios-red); }
-        .timer-controls { display: flex; gap: 15px; }
-
-        /* Pro Scoreboard */
-        .pro-scoreboard { display: flex; justify-content: space-between; align-items: stretch; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 16px; border: 1px solid var(--ios-border); flex-shrink: 0; }
-        .team-score { display: flex; flex-direction: column; gap: 8px; flex: 1; align-items: center; justify-content: flex-start; }
-        .team-name { font-size: 20px; font-weight: 800; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-        .score-center { display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.1); border-radius: 12px; margin: 0 15px; padding: 0 20px; }
-        .score-center div { font-size: 42px; font-weight: 900; font-variant-numeric: tabular-nums; }
-
-        .btn-goal { font-size: 16px; font-weight: bold; padding: 14px; border-radius: 12px; border: none; cursor: pointer; width: 100%; max-width: 160px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-goal:active { transform: scale(0.95); }
-        .btn-goal.plus.btn-goal-mine { background: var(--ios-blue); color: white; border: 2px solid rgba(255,255,255,0.2); }
-        .btn-goal.plus.btn-goal-opp { background: rgba(255,255,255,0.15); color: white; border: 1px solid var(--ios-border); }
-        
-        /* לחצן ביטול שער */
-        .btn-goal-cancel { font-size: 14px; font-weight: 600; color: var(--ios-red); background: transparent; border: 1px solid var(--ios-red); padding: 6px; border-radius: 8px; cursor: pointer; width: 100%; max-width: 120px; margin-top: auto; }
-
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px); }
-        .modal-overlay.hidden { display: none; }
-        .modal-content { width: 90%; max-width: 600px; padding: 30px; text-align: center; border: 1px solid var(--ios-border); }
-        .scorers-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; max-height: 45vh; overflow-y: auto; }
-
-        /* Table Report */
-        .table-responsive { overflow-y: auto; max-height: 50vh; margin-top: 10px; border-radius: 10px; border: 1px solid var(--ios-border); background: rgba(0,0,0,0.3); }
-        .stats-table { width: 100%; border-collapse: collapse; text-align: center; }
-        .stats-table th { padding: 8px; background: rgba(0,0,0,0.8); position: sticky; top: 0; font-size: 14px; font-weight: bold; border-bottom: 2px solid var(--ios-border); }
-        .stats-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; }
-        .status-ok { color: var(--ios-green); font-weight: bold; }
-        .status-risk { color: var(--ios-red); font-weight: bold; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseAlert { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.8); } 50% { box-shadow: 0 0 0 15px rgba(255, 69, 58, 0); } }
-        @keyframes pulseGreen { 0%, 100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.5); } 50% { box-shadow: 0 0 0 15px rgba(48, 209, 88, 0); } }
-
-        /* Print adjustments for PDF */
-        @media print {
-            body { background: white; color: black; }
-            .glass-panel { background: none; border: none; box-shadow: none; filter: none; }
-            .table-responsive { max-height: none; overflow: visible; background: none; }
-            .stats-table th { background: #f0f0f0; color: black; border-bottom: 2px solid #000; }
-            .stats-table td { border-bottom: 1px solid #ccc; color: black; }
-            .status-ok { color: green; } .status-risk { color: red; }
-            #summary-content-area { width: 100%; max-width: none; padding: 0; border: none; }
-            .no-print { display: none !important; }
-        }
-    </style>
 </head>
 <body>
     <div class="background-gradient"></div>
 
     <div class="app-container">
+        <!-- אזור עליון - ניווט -->
         <header class="top-bar glass-panel">
             <div class="nav-buttons">
                 <button id="nav-home" class="ios-button-small">ראשי</button>
@@ -182,34 +24,24 @@
                 <button id="nav-live" class="ios-button-small" style="display:none; background: rgba(48, 209, 88, 0.3);">לייב 🔴</button>
                 <button id="btn-fullscreen" class="ios-button-small">מסך מלא 🔲</button>
             </div>
-            <div class="version-info">
-                <span>גרסה 2.0</span><br>
-                <span id="last-update">עדכון אחרון: 10.05.2026</span>
-            </div>
+            <div id="live-date" class="date-display">טוען תאריך...</div>
         </header>
 
+        <!-- 1. מסך הבית -->
         <main id="home-screen" class="screen active">
             <div class="hero-section glass-panel">
                 <div class="logo-container">
-                    <h1 class="system-title">T<span class="bouncing-ball">⚽️</span>uchline</h1>
-                    <div class="credit">by Idan Biton</div>
+                    <h1 class="system-title">T<span class="bouncing-ball" style="display: inline-block;">⚽️</span>uchline</h1>
                 </div>
-                
-                <div class="home-actions">
-                    <button id="btn-new-match" class="ios-button primary-action">התחלת משחק חדש</button>
-                    <button id="btn-export-json" class="ios-button secondary-action" style="display:none;">ייצוא משחק פעיל כקובץ 💾</button>
-                    <button id="btn-import-json-trigger" class="ios-button secondary-action">טעינת קובץ משחק 📁</button>
-                    <input type="file" id="file-import-json" accept=".json" style="display:none;">
-                </div>
-                
-                <div class="saved-matches-area">
-                    <h3 style="margin-bottom: 15px; color: var(--text-secondary);">משחקים שמורים במערכת:</h3>
-                    <div id="saved-matches-grid" class="saved-matches-grid">
-                        </div>
-                </div>
+                <p class="subtitle">ניהול משחק כדורגל בזמן אמת</p>
+                <button id="btn-new-match" class="ios-button primary-action">התחלת משחק חדש</button>
+                <button id="btn-resume-match" class="ios-button active-match-widget hidden">
+                    <div class="pulse-indicator"></div><span>עבור למשחק הפעיל (לייב/שמור)</span>
+                </button>
             </div>
         </main>
 
+        <!-- 2. מסך הגדרות וסגל -->
         <main id="setup-screen" class="screen">
             <div class="setup-container glass-panel">
                 <h2>הגדרות משחק וסגל הקבוצה</h2>
@@ -244,7 +76,7 @@
                             <input type="time" id="match-time" required>
                         </div>
                         <div class="form-group">
-                            <label>משך משחק (דקות)</label>
+                            <label>משך משחק</label>
                             <select id="match-duration"><option value="70" selected>70 דק' (35/מחצית)</option><option value="60">60 דק'</option><option value="90">90 דק'</option></select>
                         </div>
                     </div>
@@ -258,16 +90,17 @@
                             </div>
                         </div>
                         <div id="players-list-container" class="players-list-container"></div>
-                        <button type="button" id="btn-add-player" class="ios-button-small" style="width:100%; margin-top:10px; background:rgba(48,209,88,0.2); border-color:var(--ios-green);">+ הוסף שחקן לסגל</button>
+                        <button type="button" id="btn-add-player" class="ios-button-small add-btn">+ הוסף שחקן לסגל</button>
                     </div>
                     
-                    <div class="form-actions" style="margin-top: 30px;">
+                    <div class="form-actions">
                         <button type="submit" class="ios-button primary-action" style="width: 100%;">שמור והמשך לבדיקת נוכחות</button>
                     </div>
                 </form>
             </div>
         </main>
 
+        <!-- 3. מסך נוכחות משחק -->
         <main id="attendance-screen" class="screen">
             <div class="setup-container glass-panel">
                 <h2>בדיקת נוכחות למשחק</h2>
@@ -276,29 +109,31 @@
                 
                 <div id="attendance-list-container" class="attendance-list-container"></div>
                 
-                <div class="form-actions" style="margin-top:30px; display:flex; gap:10px;">
-                    <button id="btn-back-to-setup" class="ios-button secondary-action" style="flex:1;">חזור להגדרות</button>
-                    <button id="btn-confirm-attendance" class="ios-button primary-action" style="flex:2;">אשר נוכחות ועבור להרכב</button>
+                <div class="form-actions" style="margin-top:30px;">
+                    <button id="btn-back-to-setup" class="ios-button secondary-action">חזור להגדרות</button>
+                    <button id="btn-confirm-attendance" class="ios-button primary-action">אשר נוכחות ועבור להרכב</button>
                 </div>
             </div>
         </main>
 
+        <!-- 4. מסך תכנון הרכב -->
         <main id="lineup-screen" class="screen">
             <div class="lineup-container">
                 <div class="lineup-header glass-panel">
-                    <h2>תכנון הרכבים</h2>
+                    <h2>תכנון הרכבים (משחקים / מחצית שניה)</h2>
                     <button id="btn-go-live" class="ios-button primary-action" style="background-color: var(--ios-green);">עבור לניהול משחק ⚽️</button>
                 </div>
                 <div class="lineup-saves glass-panel">
-                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור הרכב 1</button>
+                    <button type="button" class="ios-button-small save-lineup" data-slot="1">שמור הרכב נוכחי 1</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="1">טען הרכב 1</button>
-                    <span style="color:var(--text-secondary);">|</span>
+                    <span class="divider">|</span>
                     <button type="button" class="ios-button-small save-lineup" data-slot="2">שמור הרכב 2</button>
                     <button type="button" class="ios-button-small load-lineup" data-slot="2">טען הרכב 2</button>
-                    <span style="color:var(--text-secondary);">|</span>
+                    <span class="divider">|</span>
                     <button type="button" id="btn-clear-lineup" class="ios-button-small" style="color: #ff453a; border-color: #ff453a;">נקה הרכב 🗑️</button>
                 </div>
                 
+                <!-- פריסת מגרשים וספסל זהה ללייב -->
                 <div class="tactical-area">
                     <div id="pitches-container" class="pitches-wrapper"></div>
                 </div>
@@ -309,9 +144,11 @@
             </div>
         </main>
 
+        <!-- 5. מסך המשחק החי -->
         <main id="live-match-screen" class="screen">
             <div class="live-container">
                 
+                <!-- סרגל מרכזי עליון: תוצאה ושעון -->
                 <div class="live-master-header glass-panel">
                     <div class="master-score-container">
                         <span class="master-label">תוצאה כוללת</span>
@@ -326,17 +163,22 @@
                     </div>
                 </div>
 
+                <!-- אזור מגרשים ולייב במבנה מסודר (המגרשים למעלה, הספסל למטה) -->
                 <div class="live-body">
                     <div id="live-pitches-container" class="pitches-wrapper">
                         
+                        <!-- מגרש 1 (ימין) -->
                         <div class="pitch-column">
                             <div class="pro-scoreboard glass-panel">
+                                <!-- קבוצה שלי -->
                                 <div class="team-score">
-                                    <div class="team-name my-team-label">הקבוצה שלי</div>
+                                    <div class="team-name my-team-label">רובי שפירא</div>
                                     <button class="btn-goal btn-goal-mine plus" data-pitch="1">⚽️ שער לנו</button>
                                     <button class="btn-goal-cancel btn-goal-mine minus" data-pitch="1">ביטול שער</button>
                                 </div>
+                                <!-- תוצאה -->
                                 <div class="score-center"><div id="live-score-1">0 - 0</div></div>
+                                <!-- קבוצה יריבה -->
                                 <div class="team-score">
                                     <div class="team-name opp-team-label">יריבה</div>
                                     <button class="btn-goal btn-goal-opp plus" data-pitch="1">⚽️ שער יריבה</button>
@@ -346,14 +188,18 @@
                             <div id="live-pitch-1-container" class="pitch-mount"></div>
                         </div>
                         
+                        <!-- מגרש 2 (שמאל) -->
                         <div class="pitch-column">
                             <div class="pro-scoreboard glass-panel">
+                                <!-- קבוצה שלי -->
                                 <div class="team-score">
-                                    <div class="team-name my-team-label">הקבוצה שלי</div>
+                                    <div class="team-name my-team-label">רובי שפירא</div>
                                     <button class="btn-goal btn-goal-mine plus" data-pitch="2">⚽️ שער לנו</button>
                                     <button class="btn-goal-cancel btn-goal-mine minus" data-pitch="2">ביטול שער</button>
                                 </div>
+                                <!-- תוצאה -->
                                 <div class="score-center"><div id="live-score-2">0 - 0</div></div>
+                                <!-- קבוצה יריבה -->
                                 <div class="team-score">
                                     <div class="team-name opp-team-label">יריבה</div>
                                     <button class="btn-goal btn-goal-opp plus" data-pitch="2">⚽️ שער יריבה</button>
@@ -365,14 +211,16 @@
 
                     </div>
 
+                    <!-- ספסל המשחק (ממוקם תמיד בתחתית המסך מתחת ל-2 המגרשים) -->
                     <div id="live-bench-area" class="bench-area glass-panel">
-                        <h3>ספסל מחליפים <span style="color:var(--ios-red); font-size:12px;">(אדום מהבהב = להכניס מיד לחוק 40%)</span></h3>
+                        <h3>ספסל שחקנים בזמן אמת <span style="color:var(--ios-red); font-size:12px;">(אדום מהבהב = להכניס מיד לחוק 40%)</span></h3>
                         <div id="live-bench-players" class="bench-players-list"></div>
                     </div>
                 </div>
             </div>
         </main>
         
+        <!-- חלון בחירת כובש -->
         <div id="goal-modal" class="modal-overlay hidden">
             <div class="modal-content glass-panel">
                 <h3>מי כבש את השער?</h3>
@@ -382,6 +230,7 @@
             </div>
         </div>
 
+        <!-- חלון סיכום ו-PDF מותאם להדפסה -->
         <div id="summary-modal" class="modal-overlay hidden">
             <div class="modal-content glass-panel" id="summary-content-area" style="max-width: 900px; width: 95%;">
                 <h2 id="summary-title" style="margin-bottom: 5px;">סיכום משחק</h2>
@@ -404,689 +253,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // --- State Management & Storage ---
-            let matchState = JSON.parse(localStorage.getItem('touchlineMatchState')) || null;
-            let savedMatches = JSON.parse(localStorage.getItem('touchlineSavedMatches')) || []; 
-
-            function saveState() { 
-                if(matchState) {
-                    localStorage.setItem('touchlineMatchState', JSON.stringify(matchState)); 
-                    updateSavedMatchesList(); 
-                }
-            }
-
-            function updateSavedMatchesList() {
-                if(!matchState) return;
-                const matchData = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                if(!matchData) return;
-                
-                const matchId = matchData.date + '_' + matchData.time; 
-                const existingIdx = savedMatches.findIndex(m => m.id === matchId);
-                
-                const snapshot = {
-                    id: matchId,
-                    title: `${matchData.myTeam} נגד ${matchData.opponent}`,
-                    date: matchData.date,
-                    state: matchState,
-                    data: matchData,
-                    players: JSON.parse(localStorage.getItem('tacticalPlayers')),
-                    roster: JSON.parse(localStorage.getItem('defaultRoster'))
-                };
-
-                if(existingIdx > -1) savedMatches[existingIdx] = snapshot;
-                else savedMatches.push(snapshot);
-                
-                localStorage.setItem('touchlineSavedMatches', JSON.stringify(savedMatches));
-                renderSavedMatchesGrid();
-            }
-
-            // --- Home Screen: Render Matches ---
-            function renderSavedMatchesGrid() {
-                const grid = document.getElementById('saved-matches-grid');
-                grid.innerHTML = '';
-                
-                if(savedMatches.length === 0) {
-                    grid.innerHTML = '<p style="color:var(--text-secondary);">אין משחקים שמורים כרגע.</p>';
-                    return;
-                }
-
-                const currentMatchData = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                const currentId = currentMatchData ? (currentMatchData.date + '_' + currentMatchData.time) : null;
-
-                savedMatches.forEach(match => {
-                    const cube = document.createElement('div');
-                    cube.className = 'match-cube';
-                    
-                    if(match.id === currentId && match.state && match.state.isActive) {
-                        cube.classList.add('active-match');
-                    }
-                    
-                    cube.innerHTML = `
-                        <button class="btn-delete-match" data-id="${match.id}" title="מחק משחק">X</button>
-                        <h3>${match.title}</h3>
-                        <p>${match.date}</p>
-                    `;
-                    
-                    cube.addEventListener('click', (e) => {
-                        if(e.target.classList.contains('btn-delete-match')) return;
-                        loadMatchSnapshot(match);
-                    });
-
-                    cube.querySelector('.btn-delete-match').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if(confirm('האם למחוק משחק זה?')) {
-                            savedMatches = savedMatches.filter(m => m.id !== match.id);
-                            localStorage.setItem('touchlineSavedMatches', JSON.stringify(savedMatches));
-                            if(match.id === currentId) { 
-                                localStorage.removeItem('touchlineMatchState');
-                                localStorage.removeItem('tacticalMatchData');
-                                localStorage.removeItem('tacticalPlayers');
-                                matchState = null;
-                            }
-                            renderSavedMatchesGrid();
-                            checkResumeButton();
-                        }
-                    });
-
-                    grid.appendChild(cube);
-                });
-            }
-
-            function loadMatchSnapshot(snapshot) {
-                localStorage.setItem('tacticalMatchData', JSON.stringify(snapshot.data));
-                localStorage.setItem('tacticalPlayers', JSON.stringify(snapshot.players));
-                localStorage.setItem('defaultRoster', JSON.stringify(snapshot.roster));
-                localStorage.setItem('touchlineMatchState', JSON.stringify(snapshot.state));
-                matchState = snapshot.state;
-                checkResumeButton();
-                
-                if(matchState.isActive) {
-                    initLineupBuilder(); 
-                    switchScreen('live');
-                } else {
-                    switchScreen('setup');
-                }
-            }
-
-            // --- JSON Export / Import ---
-            document.getElementById('btn-export-json').addEventListener('click', () => {
-                const currentMatchData = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                if(!currentMatchData || !matchState) return alert('אין משחק פעיל לייצא.');
-                
-                const exportObj = {
-                    version: "2.0",
-                    data: currentMatchData,
-                    state: matchState,
-                    players: JSON.parse(localStorage.getItem('tacticalPlayers')),
-                    roster: JSON.parse(localStorage.getItem('defaultRoster'))
-                };
-                
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", `Touchline_Match_${currentMatchData.date}.json`);
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-            });
-
-            document.getElementById('btn-import-json-trigger').addEventListener('click', () => document.getElementById('file-import-json').click());
-            document.getElementById('file-import-json').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const imported = JSON.parse(event.target.result);
-                        if(imported.version && imported.data && imported.state) {
-                            const matchId = imported.data.date + '_' + imported.data.time;
-                            imported.id = matchId;
-                            imported.title = `${imported.data.myTeam} נגד ${imported.data.opponent}`;
-                            imported.date = imported.data.date;
-                            
-                            const existingIdx = savedMatches.findIndex(m => m.id === matchId);
-                            if(existingIdx > -1) savedMatches[existingIdx] = imported;
-                            else savedMatches.push(imported);
-                            
-                            localStorage.setItem('touchlineSavedMatches', JSON.stringify(savedMatches));
-                            renderSavedMatchesGrid();
-                            alert('קובץ המשחק נטען ושומר ברשימה בהצלחה!');
-                        } else {
-                            alert('קובץ JSON לא תקין או לא שייך למערכת.');
-                        }
-                    } catch (err) { alert('שגיאה בקריאת הקובץ.'); }
-                };
-                reader.readAsText(file);
-                e.target.value = '';
-            });
-
-
-            // --- Clocks & Timers ---
-            function updateClocks() {
-                if (matchState && matchState.timerRunning && matchState.lastTickTime) {
-                    const diff = Math.floor((Date.now() - matchState.lastTickTime) / 1000);
-                    if (diff > 0) {
-                        matchState.elapsedSeconds += diff;
-                        matchState.lastTickTime = Date.now();
-                        updatePlayerMinutes(diff);
-                        saveState();
-                    }
-                }
-                renderTimer();
-                check40PercentRule(); 
-            }
-            setInterval(updateClocks, 1000);
-
-            function renderTimer() {
-                if(!matchState) return;
-                const matchData = JSON.parse(localStorage.getItem('tacticalMatchData')) || { duration: 70 };
-                const halfTimeSeconds = (matchData.duration / 2) * 60;
-                
-                const m = Math.floor(matchState.elapsedSeconds / 60).toString().padStart(2, '0');
-                const s = (matchState.elapsedSeconds % 60).toString().padStart(2, '0');
-                const mainClock = document.getElementById('main-stopwatch');
-                
-                if(mainClock) {
-                    mainClock.textContent = `${m}:${s}`;
-                    if ((matchState.currentHalf === 1 && matchState.elapsedSeconds >= halfTimeSeconds) ||
-                        (matchState.currentHalf === 2 && matchState.elapsedSeconds >= halfTimeSeconds * 2)) {
-                        mainClock.classList.add('injury');
-                    } else {
-                        mainClock.classList.remove('injury');
-                    }
-                }
-            }
-
-            // --- Navigation Flow ---
-            const screens = {
-                home: document.getElementById('home-screen'),
-                setup: document.getElementById('setup-screen'),
-                attendance: document.getElementById('attendance-screen'),
-                lineup: document.getElementById('lineup-screen'),
-                live: document.getElementById('live-match-screen')
-            };
-
-            function checkResumeButton() {
-                const resumeBtn = document.getElementById('btn-resume-match');
-                const exportBtn = document.getElementById('btn-export-json');
-                const hasMatch = !!localStorage.getItem('tacticalMatchData');
-                if(hasMatch) {
-                    resumeBtn.classList.remove('hidden');
-                    exportBtn.style.display = 'inline-block';
-                } else {
-                    resumeBtn.classList.add('hidden');
-                    exportBtn.style.display = 'none';
-                }
-            }
-
-            function switchScreen(screenName) {
-                Object.values(screens).forEach(s => s.classList.remove('active'));
-                screens[screenName].classList.add('active');
-                
-                document.getElementById('nav-live').style.display = (matchState && matchState.isActive) ? 'block' : 'none';
-                document.getElementById('nav-attendance').style.display = localStorage.getItem('tacticalMatchData') ? 'block' : 'none';
-                document.getElementById('nav-lineup').style.display = localStorage.getItem('tacticalMatchData') ? 'block' : 'none';
-                
-                if(screenName === 'live') {
-                    renderScores();
-                    updateTeamNames();
-                    document.getElementById('live-pitch-1-container').appendChild(document.getElementById('lineup_pitch_1') || createEmptyPitch(1));
-                    document.getElementById('live-pitch-2-container').appendChild(document.getElementById('lineup_pitch_2') || createEmptyPitch(2));
-                    const liveBench = document.getElementById('live-bench-players');
-                    const oldBench = document.getElementById('bench-players');
-                    while(oldBench && oldBench.firstChild) liveBench.appendChild(oldBench.firstChild);
-                }
-                
-                if(screenName === 'home') {
-                    renderSavedMatchesGrid();
-                    checkResumeButton();
-                }
-            }
-
-            function createEmptyPitch(i) {
-                const pitch = document.createElement('div');
-                pitch.className = 'pitch-half'; pitch.id = `lineup_pitch_${i}`;
-                const rows = [1, 2, 2, 1, 1];
-                let zoneIdx = 0;
-                rows.forEach(c => {
-                    const rowEl = document.createElement('div'); rowEl.className = 'pitch-row';
-                    for(let j=0; j<c; j++) {
-                        const zone = document.createElement('div'); zone.className = 'drop-zone'; zone.id = `zone_${i}_${zoneIdx++}`;
-                        enableZoneClick(zone, document.getElementById('live-bench-players'));
-                        rowEl.appendChild(zone);
-                    }
-                    pitch.appendChild(rowEl);
-                });
-                return pitch;
-            }
-
-            document.getElementById('nav-home').addEventListener('click', () => switchScreen('home'));
-            document.getElementById('nav-setup').addEventListener('click', () => switchScreen('setup'));
-            document.getElementById('nav-attendance').addEventListener('click', () => switchScreen('attendance'));
-            document.getElementById('nav-lineup').addEventListener('click', () => switchScreen('lineup'));
-            document.getElementById('nav-live').addEventListener('click', () => switchScreen('live'));
-            
-            document.getElementById('btn-new-match').addEventListener('click', () => {
-                matchState = null;
-                localStorage.removeItem('tacticalMatchData'); 
-                document.getElementById('setup-form').reset();
-                document.getElementById('my-team-name').value = "מ.ס רובי שפירא"; 
-                switchScreen('setup');
-            });
-            
-            document.getElementById('btn-resume-match').addEventListener('click', () => {
-                if(matchState && matchState.isActive) switchScreen('live');
-                else switchScreen('lineup');
-            });
-
-            document.getElementById('btn-fullscreen').addEventListener('click', () => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
-                else document.exitFullscreen();
-            });
-
-            // --- SETUP: Roster ---
-            const playersContainer = document.getElementById('players-list-container');
-            function createSetupPlayerRow(name = '', number = '') {
-                const row = document.createElement('div');
-                row.className = 'player-input-row';
-                row.innerHTML = `<input type="text" class="p-name" placeholder="שם מלא" value="${name}"><input type="number" class="p-number" placeholder="מס'" value="${number}"><button type="button" class="btn-remove-player" title="מחק">X</button>`;
-                row.querySelector('.btn-remove-player').addEventListener('click', () => row.remove());
-                playersContainer.appendChild(row);
-            }
-
-            const loadDefRoster = JSON.parse(localStorage.getItem('defaultRoster'));
-            if(loadDefRoster && loadDefRoster.length > 0) {
-                loadDefRoster.forEach(p => createSetupPlayerRow(p.name, p.number));
-            } else {
-                createSetupPlayerRow(); createSetupPlayerRow();
-            }
-
-            document.getElementById('btn-add-player').addEventListener('click', () => createSetupPlayerRow());
-            document.getElementById('btn-load-excel').addEventListener('click', () => document.getElementById('file-excel').click());
-            document.getElementById('file-excel').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-                        playersContainer.innerHTML = '';
-                        let startIdx = (rows.length > 0 && isNaN(parseInt(rows[0][1]))) ? 1 : 0;
-                        for(let i = startIdx; i < rows.length; i++) {
-                            if(rows[i] && rows[i].length >= 2) createSetupPlayerRow(rows[i][0]||'', rows[i][1]||'');
-                        }
-                    } catch (err) { alert('שגיאה בקריאת הקובץ.'); }
-                };
-                reader.readAsArrayBuffer(file); e.target.value = ''; 
-            });
-
-            document.getElementById('setup-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const matchData = {
-                    myTeam: document.getElementById('my-team-name').value,
-                    opponent: document.getElementById('opponent-name').value,
-                    location: document.getElementById('match-location').value,
-                    homeAway: document.getElementById('home-away').value,
-                    date: document.getElementById('match-date').value,
-                    time: document.getElementById('match-time').value,
-                    duration: parseInt(document.getElementById('match-duration').value)
-                };
-                localStorage.setItem('tacticalMatchData', JSON.stringify(matchData));
-
-                const roster = [];
-                document.querySelectorAll('.player-input-row').forEach((row, index) => {
-                    const name = row.querySelector('.p-name').value.trim();
-                    const number = row.querySelector('.p-number').value.trim();
-                    if(name && number) roster.push({ id: 'p_' + index, name, number, goals: 0, secondsPlayed: 0 });
-                });
-                localStorage.setItem('defaultRoster', JSON.stringify(roster)); 
-
-                buildAttendanceList(roster);
-                switchScreen('attendance');
-            });
-
-            // --- ATTENDANCE ---
-            function buildAttendanceList(roster) {
-                const attContainer = document.getElementById('attendance-list-container');
-                attContainer.innerHTML = '';
-                document.getElementById('total-roster-count').textContent = roster.length;
-                
-                roster.forEach(p => {
-                    const row = document.createElement('div');
-                    row.className = 'attendance-row';
-                    row.innerHTML = `<input type="checkbox" class="att-checkbox" id="att_${p.id}" checked>
-                                     <label for="att_${p.id}" class="att-name">${p.name}</label>
-                                     <span class="att-num">${p.number}</span>`;
-                    row.querySelector('input').addEventListener('change', updateAttCount);
-                    attContainer.appendChild(row);
-                });
-                updateAttCount();
-            }
-
-            function updateAttCount() { document.getElementById('total-arrived-count').textContent = document.querySelectorAll('.att-checkbox:checked').length; }
-            document.getElementById('btn-back-to-setup').addEventListener('click', () => switchScreen('setup'));
-
-            document.getElementById('btn-confirm-attendance').addEventListener('click', () => {
-                const roster = JSON.parse(localStorage.getItem('defaultRoster')) || [];
-                const matchSquad = [];
-                roster.forEach(p => {
-                    const cb = document.getElementById(`att_${p.id}`);
-                    if(cb && cb.checked) matchSquad.push(p);
-                });
-                localStorage.setItem('tacticalPlayers', JSON.stringify(matchSquad));
-                
-                if(!matchState) {
-                    matchState = { isActive: false, timerRunning: false, elapsedSeconds: 0, currentHalf: 1, scores: { myTeam1: 0, opp1: 0, myTeam2: 0, opp2: 0 }, lastTickTime: null };
-                }
-                saveState();
-                checkResumeButton();
-
-                initLineupBuilder();
-                switchScreen('lineup');
-            });
-
-            // --- LINEUP ---
-            let selectedCard = null;
-
-            function initLineupBuilder() {
-                const players = JSON.parse(localStorage.getItem('tacticalPlayers')) || [];
-                const pitchesContainer = document.getElementById('pitches-container');
-                const benchContainer = document.getElementById('bench-players');
-                
-                if(!document.getElementById('lineup_pitch_1')) {
-                    pitchesContainer.innerHTML = ''; 
-                    for(let i = 1; i <= 2; i++) {
-                        const pitch = createEmptyPitch(i);
-                        pitchesContainer.appendChild(pitch);
-                    }
-                } else {
-                    pitchesContainer.appendChild(document.getElementById('lineup_pitch_1'));
-                    pitchesContainer.appendChild(document.getElementById('lineup_pitch_2'));
-                }
-
-                benchContainer.innerHTML = '';
-                const liveBench = document.getElementById('live-bench-players');
-                while(liveBench && liveBench.firstChild) benchContainer.appendChild(liveBench.firstChild);
-
-                players.forEach(p => {
-                    if(!document.getElementById(p.id)) {
-                        const card = document.createElement('div');
-                        card.className = 'player-card'; card.id = p.id;
-                        card.innerHTML = `<div class="player-number">${p.number}</div><div class="player-name">${p.name}</div>`;
-                        enablePlayerClick(card, benchContainer);
-                        benchContainer.appendChild(card);
-                    }
-                });
-            }
-
-            function enablePlayerClick(card, benchContainer) {
-                card.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const activeBench = document.getElementById('live-bench-players').contains(this) ? document.getElementById('live-bench-players') : document.getElementById('bench-players');
-                    
-                    if (selectedCard) {
-                        if (selectedCard === this) { selectedCard.classList.remove('selected'); selectedCard = null; }
-                        else {
-                            const pA = selectedCard.parentNode, pB = this.parentNode;
-                            if (pA === pB && (pA.id === 'bench-players' || pA.id === 'live-bench-players')) {
-                                selectedCard.classList.remove('selected'); selectedCard = this; this.classList.add('selected');
-                            } else {
-                                pB.appendChild(selectedCard); pA.appendChild(this);
-                                selectedCard.classList.remove('selected'); selectedCard = null;
-                            }
-                        }
-                    } else { selectedCard = this; this.classList.add('selected'); }
-                });
-            }
-
-            function enableZoneClick(zone, benchContainer) {
-                zone.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if(!selectedCard) { if(this.children.length > 0) { selectedCard = this.children[0]; selectedCard.classList.add('selected'); } return; }
-                    if(this.children.length > 0) selectedCard.parentNode.appendChild(this.children[0]);
-                    this.appendChild(selectedCard);
-                    selectedCard.classList.remove('selected'); selectedCard = null;
-                });
-            }
-
-            document.getElementById('bench-area').addEventListener('click', function() {
-                if(selectedCard) { document.getElementById('bench-players').appendChild(selectedCard); selectedCard.classList.remove('selected'); selectedCard = null; }
-            });
-
-            document.getElementById('btn-clear-lineup').addEventListener('click', () => {
-                const bench = document.getElementById('bench-players');
-                document.querySelectorAll('.drop-zone .player-card').forEach(p => bench.appendChild(p));
-            });
-
-            document.querySelectorAll('.save-lineup').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const slot = this.getAttribute('data-slot');
-                    const state = [];
-                    document.querySelectorAll('.drop-zone').forEach(zone => {
-                        if(zone.children.length > 0) state.push({ zoneId: zone.id, playerId: zone.children[0].id });
-                    });
-                    localStorage.setItem(`savedLineup_${slot}`, JSON.stringify(state));
-                    alert('הרכב נשמר!');
-                });
-            });
-
-            document.querySelectorAll('.load-lineup').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const slot = this.getAttribute('data-slot');
-                    const state = JSON.parse(localStorage.getItem(`savedLineup_${slot}`));
-                    if(!state) return alert('אין הרכב שמור במיקום זה.');
-                    const bench = document.getElementById('bench-players');
-                    document.querySelectorAll('.drop-zone .player-card').forEach(p => bench.appendChild(p));
-                    state.forEach(item => {
-                        const zone = document.getElementById(item.zoneId);
-                        const player = document.getElementById(item.playerId);
-                        if(zone && player) zone.appendChild(player);
-                    });
-                });
-            });
-
-            // --- מעבר למשחק חי ---
-            document.getElementById('btn-go-live').addEventListener('click', () => {
-                matchState.isActive = true; saveState();
-                
-                const livePitch1 = document.getElementById('live-pitch-1-container');
-                const livePitch2 = document.getElementById('live-pitch-2-container');
-                const liveBench = document.getElementById('live-bench-players');
-                
-                livePitch1.appendChild(document.getElementById('lineup_pitch_1'));
-                livePitch2.appendChild(document.getElementById('lineup_pitch_2'));
-                
-                const oldBench = document.getElementById('bench-players');
-                while(oldBench.firstChild) {
-                    liveBench.appendChild(oldBench.firstChild);
-                }
-                
-                document.getElementById('live-bench-area').addEventListener('click', function() {
-                    if(selectedCard) { liveBench.appendChild(selectedCard); selectedCard.classList.remove('selected'); selectedCard = null; }
-                });
-
-                switchScreen('live');
-            });
-
-            // --- LIVE MATCH LOGIC ---
-            function updateTeamNames() {
-                const data = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                if(!data) return;
-                document.querySelectorAll('.my-team-label').forEach(el => el.textContent = data.myTeam);
-                document.querySelectorAll('.opp-team-label').forEach(el => el.textContent = data.opponent);
-            }
-
-            const btnToggleTimer = document.getElementById('btn-toggle-timer');
-            btnToggleTimer.addEventListener('click', () => {
-                if(matchState.timerRunning) {
-                    matchState.timerRunning = false; matchState.lastTickTime = null;
-                    btnToggleTimer.textContent = 'המשך משחק'; btnToggleTimer.classList.replace('secondary-action', 'primary-action');
-                    btnToggleTimer.style.color = '#fff';
-                } else {
-                    matchState.timerRunning = true; matchState.lastTickTime = Date.now();
-                    btnToggleTimer.textContent = 'עצור שעון'; btnToggleTimer.classList.replace('primary-action', 'secondary-action');
-                }
-                saveState();
-            });
-
-            function check40PercentRule() {
-                if(!matchState) return;
-                const players = JSON.parse(localStorage.getItem('tacticalPlayers')) || [];
-                const matchData = JSON.parse(localStorage.getItem('tacticalMatchData')) || { duration: 70 };
-                const totalSecs = matchData.duration * 60;
-                const requiredSecs = totalSecs * 0.4;
-                const remainingSecs = totalSecs - matchState.elapsedSeconds;
-
-                players.forEach(p => {
-                    const card = document.getElementById(p.id);
-                    if(card) {
-                        const needed = requiredSecs - p.secondsPlayed;
-                        if (needed > 0 && needed >= (remainingSecs - 60)) {
-                            card.classList.add('alert-40');
-                        } else {
-                            card.classList.remove('alert-40');
-                        }
-                    }
-                });
-            }
-
-            function updatePlayerMinutes(sec) {
-                const players = JSON.parse(localStorage.getItem('tacticalPlayers')) || [];
-                const onPitch = document.querySelectorAll('#live-pitches-container .player-card');
-                onPitch.forEach(el => {
-                    const idx = players.findIndex(p => p.id === el.id);
-                    if(idx > -1) players[idx].secondsPlayed += sec;
-                });
-                localStorage.setItem('tacticalPlayers', JSON.stringify(players));
-            }
-
-            function renderScores() {
-                if(!matchState) return;
-                const s = matchState.scores;
-                document.getElementById('live-score-1').textContent = `${s.myTeam1} - ${s.opp1}`;
-                document.getElementById('live-score-2').textContent = `${s.myTeam2} - ${s.opp2}`;
-                document.getElementById('live-score-total').textContent = `${s.myTeam1+s.myTeam2} - ${s.opp1+s.opp2}`;
-            }
-
-            document.querySelectorAll('.btn-goal-opp').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const pitch = this.getAttribute('data-pitch');
-                    const isPlus = this.classList.contains('plus');
-                    if(pitch === '1') matchState.scores.opp1 = Math.max(0, matchState.scores.opp1 + (isPlus?1:-1));
-                    else matchState.scores.opp2 = Math.max(0, matchState.scores.opp2 + (isPlus?1:-1));
-                    saveState(); renderScores();
-                });
-            });
-
-            let pendingGoalPitch = 0;
-            const goalModal = document.getElementById('goal-modal');
-
-            document.querySelectorAll('.btn-goal-mine').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    pendingGoalPitch = this.getAttribute('data-pitch');
-                    const isPlus = this.classList.contains('plus');
-                    
-                    if(!isPlus) { 
-                        if(pendingGoalPitch==='1') matchState.scores.myTeam1 = Math.max(0, matchState.scores.myTeam1 - 1);
-                        else matchState.scores.myTeam2 = Math.max(0, matchState.scores.myTeam2 - 1);
-                        saveState(); renderScores(); return;
-                    }
-
-                    const pitchEl = document.getElementById(`lineup_pitch_${pendingGoalPitch}`);
-                    const playersOnPitch = pitchEl.querySelectorAll('.player-card');
-                    const listGrid = document.getElementById('goal-scorers-list');
-                    listGrid.innerHTML = '';
-                    
-                    if(playersOnPitch.length === 0) { alert('אין שחקנים במגרש זה!'); return; }
-
-                    playersOnPitch.forEach(card => {
-                        const b = document.createElement('button');
-                        b.className = 'ios-button-small';
-                        b.textContent = card.querySelector('.player-name').textContent + ` (${card.querySelector('.player-number').textContent})`;
-                        b.style.padding = '15px 25px'; b.style.background = 'var(--ios-blue)'; b.style.fontSize = '18px';
-                        b.style.fontWeight = 'bold';
-                        
-                        b.addEventListener('click', () => {
-                            const players = JSON.parse(localStorage.getItem('tacticalPlayers'));
-                            const pIdx = players.findIndex(p => p.id === card.id);
-                            if(pIdx > -1) {
-                                players[pIdx].goals += 1;
-                                localStorage.setItem('tacticalPlayers', JSON.stringify(players));
-                                if(pendingGoalPitch==='1') matchState.scores.myTeam1++; else matchState.scores.myTeam2++;
-                                saveState(); renderScores();
-                                goalModal.classList.add('hidden');
-                            }
-                        });
-                        listGrid.appendChild(b);
-                    });
-                    goalModal.classList.remove('hidden');
-                });
-            });
-            document.getElementById('btn-cancel-goal-modal').addEventListener('click', () => goalModal.classList.add('hidden'));
-
-            // --- סיכום מחצית וסיום ---
-            const summaryModal = document.getElementById('summary-modal');
-            document.getElementById('btn-end-half').addEventListener('click', () => {
-                matchState.timerRunning = false; saveState();
-                const data = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                const players = JSON.parse(localStorage.getItem('tacticalPlayers'));
-                
-                document.getElementById('rep-teams').textContent = `${data.myTeam} נגד ${data.opponent}`;
-                document.getElementById('rep-details').textContent = `${data.date} ${data.time} | ${data.location} | ${data.homeAway === 'home'?'משחק בית':'משחק חוץ'}`;
-                const s = matchState.scores;
-                document.getElementById('rep-score').textContent = `תוצאה סופית: ${s.myTeam1+s.myTeam2} - ${s.opp1+s.opp2} (מגרש 1: ${s.myTeam1}-${s.opp1} | מגרש 2: ${s.myTeam2}-${s.opp2})`;
-
-                const tbody = document.getElementById('summary-stats-body'); tbody.innerHTML = '';
-                const reqSec = (data.duration * 60) * 0.4;
-
-                players.forEach(p => {
-                    const mins = Math.floor(p.secondsPlayed / 60);
-                    const percent = Math.round((p.secondsPlayed / (data.duration * 60)) * 100) || 0;
-                    const status = p.secondsPlayed >= reqSec ? '<span class="status-ok">כן</span>' : '<span class="status-risk">לא (הפרה)</span>';
-                    tbody.innerHTML += `<tr><td style="font-weight:bold;">${p.number}</td><td style="font-weight:bold;">${p.name}</td><td>${mins}</td><td>${percent}%</td><td>${status}</td><td style="font-size:18px; font-weight:bold;">${p.goals}</td></tr>`;
-                });
-                
-                document.getElementById('btn-continue-match').style.display = (matchState.currentHalf === 1) ? 'inline-block' : 'none';
-                document.getElementById('summary-title').textContent = (matchState.currentHalf === 1) ? 'סיכום מחצית ראשונה' : 'סיכום משחק מלא';
-                summaryModal.classList.remove('hidden');
-            });
-
-            document.getElementById('btn-close-summary').addEventListener('click', () => summaryModal.classList.add('hidden'));
-            
-            document.getElementById('btn-continue-match').addEventListener('click', () => {
-                matchState.currentHalf = 2;
-                const data = JSON.parse(localStorage.getItem('tacticalMatchData'));
-                matchState.elapsedSeconds = (data.duration / 2) * 60; 
-                saveState(); updateClocks();
-                summaryModal.classList.add('hidden');
-                document.getElementById('btn-end-half').textContent = 'סיים משחק סופית';
-                
-                switchScreen('lineup');
-            });
-
-            document.getElementById('btn-export-pdf').addEventListener('click', () => {
-                const el = document.getElementById('summary-content-area');
-                const opt = {
-                    margin:       [5, 5, 5, 5], 
-                    filename:     'סיכום_משחק_Touchline.pdf',
-                    image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                    pagebreak:    { mode: ['avoid-all'] }
-                };
-                html2pdf().set(opt).from(el).save();
-            });
-            
-            renderSavedMatchesGrid();
-            checkResumeButton();
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
